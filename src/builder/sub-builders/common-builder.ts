@@ -16,16 +16,10 @@ export class CommonBuilder<ModelType, FieldType, DependentFieldType> {
 		name: Extract<keyof ModelType, string>,
 		propGetter: NestedPropGetter<ModelType, NewFieldType>,
 	): ForFieldAddedBuilder<ModelType, NewFieldType, DependentFieldType> {
-		new InitialBuilder(this.failFast, this.validationRules).forField(
+		return new InitialBuilder(this.failFast, this.validationRules).forField(
 			name,
 			propGetter,
 		);
-
-		return new ForFieldAddedBuilder<
-			ModelType,
-			NewFieldType,
-			DependentFieldType
-		>();
 	}
 
 	/**

@@ -57,19 +57,18 @@ export class Validation<ModelType> {
 
 			if (condition && !condition(state)) continue;
 
-			const validationOutcome = validator({
+			const isResultValid = validator({
 				model: state,
 				value,
 				dependentValue,
-				errorMessage: rule.errorMessage,
 			});
 
-			if (validationOutcome.isValid) continue;
+			if (isResultValid) continue;
 
 			isValid = false;
 			result[rule.name] = {
 				propertyName: rule.propertyName,
-				message: validationOutcome.results,
+				message: rule.errorMessage,
 			};
 
 			if (this.failFast) {

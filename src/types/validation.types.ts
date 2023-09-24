@@ -1,23 +1,13 @@
-export type FieldValidationResult =
-	| {
-			isValid: true;
-	  }
-	| {
-			isValid: false;
-			results: string;
-	  };
-
 export type ValidationMessage = string;
 export type ValidatorArgs<ModelType, ValueType, DependentFieldType> = {
 	model: ModelType;
 	value: ValueType;
 	dependentValue?: DependentFieldType;
-	errorMessage: string;
 };
 
 export type Validator<ModelType, ValueType, DependentFieldType> = (
 	args: ValidatorArgs<ModelType, ValueType, DependentFieldType>,
-) => FieldValidationResult;
+) => boolean;
 
 export type ValidationResult<Shape> = {
 	[key in keyof Shape]?: { propertyName: string; message: ValidationMessage };

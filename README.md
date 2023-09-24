@@ -79,9 +79,9 @@ You can create custom validation rules by passing your own validator functions t
 
 ```typescript
 const emailValidator = args => {
-  const { value, errorMessage } = args;
+  const { value } = args;
 
-  return { isValid: value.includes('@'), results: errorMessage }
+  return value.includes('@');
 };
 
 .addRule(emailValidator)
@@ -91,9 +91,9 @@ You could also do this inline:
 
 ```typescript
 .forField('email', model => model.email).addRule(args => {
-  const { value, errorMessage } = args;
+  const { value } = args;
 
-  return { isValid: value.includes('@'), results: errorMessage }
+  return value.includes('@')
 })
 ```
 

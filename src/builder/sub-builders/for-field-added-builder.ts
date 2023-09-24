@@ -119,12 +119,10 @@ export class ForFieldAddedBuilder<ModelType, FieldType, DependentFieldType> {
 		builderCallback?: (
 			builder: InitialBuilder<ModelType, unknown, unknown>,
 		) => CommonBuilder<ModelType, Field, DependentField>,
-	): ForFieldAddedBuilder<ModelType, FieldType, DependentFieldType> {
-		new CommonBuilder<ModelType, FieldType, DependentFieldType>(
+	): CommonBuilder<ModelType, FieldType, DependentFieldType> {
+		return new CommonBuilder<ModelType, FieldType, DependentFieldType>(
 			this.failFast,
 			this.validationRules,
 		).when(condition, builderCallback);
-
-		return this;
 	}
 }
