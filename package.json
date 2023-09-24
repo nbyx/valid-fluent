@@ -1,0 +1,25 @@
+{
+  "name": "valid-fluent",
+  "version": "0.0.1",
+  "type": "module",
+  "description": "A strongly-typed, chainable validation library for TypeScript. Craft intricate validation rules with Fluent API goodness. Go beyond boilerplate and embrace customizability.",
+  "main": "dist/bundle.cjs.js",
+  "module": "dist/bundle.esm.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "test": "vitest",
+    "lint": "npx rome check ./src",
+    "build": "rollup -c"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^25.0.4",
+    "@rollup/plugin-node-resolve": "^15.2.1",
+    "@types/node": "^20.6.4",
+    "rollup": "^3.29.3",
+    "rome": "^12.1.3",
+    "typescript": "^5.2.2"
+  }
+}
