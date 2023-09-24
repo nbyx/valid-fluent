@@ -9,9 +9,21 @@
   "scripts": {
     "test": "vitest",
     "lint": "npx rome check ./src",
+    "format": "npx rome format ./src --write",
     "build": "rollup -c"
   },
-  "keywords": [],
+  "keywords": [
+    "validation",
+    "fluent",
+    "typescript",
+    "form-validation",
+    "data-validation",
+    "type-safety",
+    "model-validation",
+    "backend-validation",
+    "frontend-validation",
+    "custom-rules",
+    "fluent-api"],
   "author": "",
   "license": "MIT",
   "devDependencies": {
