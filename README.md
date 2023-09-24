@@ -19,7 +19,7 @@ npm install valid-fluent
 ## Basic Usage 🚀
 Import the main ValidationBuilder class and start building your validation logic.
 ```typescript
-import { ValidationBuilder } from 'your-package-name';
+import { ValidationBuilder } from 'valid-fluent';
 
 const validation = ValidationBuilder.create<User>()
   .forField('username', u => u.username)
