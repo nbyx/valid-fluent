@@ -32,19 +32,19 @@ const result = validation.validate(user);
 ## Core Concepts
 The entry point for creating validations. Start by calling 
 ```typescript
-ValidationBuilder.create<ModelType>().
+ValidationBuilder.create<ModelType>()
 ```
 
 Use **.forField()** method to specify the property you want to validate.
 
 ```typescript
-.forField('email', u => u.email)
+builder.forField('email', u => u.email)
 ```
 
 Once you've added a rule, you can attach an error message using **.withMessage()**.
 
 ```typescript
-.addRule(emailValidator)
+builder.addRule(emailValidator)
 .withMessage('Invalid email!')
 ```
 
@@ -52,13 +52,13 @@ Once you've added a rule, you can attach an error message using **.withMessage()
 Conditional rules enable dynamic validations. Use **.when()** to conditionally apply a validation rule.
 
 ```typescript
-.addRule(emailValidator)
+builder.addRule(emailValidator)
 .when(model => model.subscribeToNewsletter)
 ```
 
 You can also add a condition to multiple validation rules by using the builder callback provided by when:
 ```typescript
-.when(model => model.subscribeToNewsletter, builder =>
+builder.when(model => model.subscribeToNewsletter, builder =>
   builder.forField(email, u => u.email)
     .addRule(emailValidator)
     .withMessage('Invalid email!')
@@ -71,7 +71,7 @@ You can also add a condition to multiple validation rules by using the builder c
 To include a dependent field in validation, use the **.dependsOn()** method.
 
 ```typescript
-.forField('passwordConfirmation', u => u.passwordConfirmation)
+builder.forField('passwordConfirmation', u => u.passwordConfirmation)
 .dependsOn(u => u.password)
 ```
 Custom Validators
@@ -84,13 +84,13 @@ const emailValidator = args => {
   return value.includes('@');
 };
 
-.addRule(emailValidator)
+builder.addRule(emailValidator)
 ```
 
 You could also do this inline:
 
 ```typescript
-.forField('email', model => model.email).addRule(args => {
+builder.forField('email', model => model.email).addRule(args => {
   const { value } = args;
 
   return value.includes('@')
