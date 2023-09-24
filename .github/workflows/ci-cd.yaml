@@ -13,14 +13,6 @@ on:
         required: true
 
 jobs:
-  pre-approval:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-      - name: Get and log current version number
-        run: echo "Current version is $(jq -r '.version' package.json)"
-
   test-and-build:
     needs: pre-approval
     runs-on: ubuntu-latest
@@ -47,6 +39,15 @@ jobs:
         with:
           name: dist
           path: dist/
+
+  pre-approval:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'release'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Get and log current version number
+        run: echo "Current version is $(jq -r '.version' package.json)"
 
   request-approval:
     needs: test-and-build
