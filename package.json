@@ -24,7 +24,14 @@
     "frontend-validation",
     "custom-rules",
     "fluent-api"],
-  "author": "",
+  "author": "Marcel Wenner (https://github.com/nbyx)",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nbyx/valid-fluent.git"
+  },
+  "bugs": {
+    "url": "https://github.com/nbyx/valid-fluent/issues"
+  },
   "license": "MIT",
   "devDependencies": {
     "@rollup/plugin-commonjs": "^25.0.4",
