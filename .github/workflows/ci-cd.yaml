@@ -6,9 +6,23 @@ on:
       - main
   release:
     types: [created]
+  workflow_dispatch:
+    inputs:
+      versionType:
+        description: 'Version bump type (major, minor, patch)'
+        required: true
 
 jobs:
+  pre-approval:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Get and log current version number
+        run: echo "Current version is $(jq -r '.version' package.json)"
+
   test-and-build:
+    needs: pre-approval
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -34,8 +48,18 @@ jobs:
           name: dist
           path: dist/
 
-  publish:
+  request-approval:
     needs: test-and-build
+    if: github.event_name == 'release'
+    runs-on: ubuntu-latest
+    environment:
+      name: 'Production'
+    steps:
+      - name: Request Approval
+        run: echo "Approval needed to proceed to the next job."
+
+  publish:
+    needs: request-approval
     if: github.event_name == 'release'
     runs-on: ubuntu-latest
     steps:
@@ -46,8 +70,7 @@ jobs:
           name: dist
           path: dist
       - name: Create package.json for dist
-        run: |
-          jq '.name = .name + "-dist"' package.json > dist/package.json
+        run: jq '.name = .name + "-dist"' package.json > dist/package.json
       - name: Use Node.js
         uses: actions/setup-node@v2
         with:
