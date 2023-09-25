@@ -35,24 +35,7 @@ export class CommonBuilder<ModelType, FieldType, DependentFieldType> {
 		) => CommonBuilder<ModelType, Field, DependentField>,
 	): CommonBuilder<ModelType, FieldType, DependentFieldType> {
 		if (builderCallback) {
-			const subBuilder = builderCallback(ValidationBuilder.create<ModelType>());
-			const subValidationRules = subBuilder.validationRules.map((rule) => ({
-				...rule,
-				propertyCondition: condition,
-			})) as unknown as ValidationRule<
-				ModelType,
-				FieldType,
-				DependentFieldType
-			>[];
-			const newValidationRules = [
-				...this.validationRules,
-				...subValidationRules,
-			] as ValidationRule<ModelType, FieldType, DependentFieldType>[];
-
-			return new CommonBuilder<ModelType, FieldType, DependentFieldType>(
-				this.failFast,
-				newValidationRules,
-			);
+			return this.handleBuilderCallback(builderCallback, condition);
 		}
 
 		if (this.validationRules.length === 0)
@@ -86,5 +69,28 @@ export class CommonBuilder<ModelType, FieldType, DependentFieldType> {
 				unknown
 			>[]),
 		]);
+	}
+
+	private handleBuilderCallback<Field, DependentField>(builderCallback: (builder: InitialBuilder<ModelType, unknown, unknown>) => CommonBuilder<ModelType, Field, DependentField>, condition: (model: ModelType) => boolean) {
+		const subBuilder = builderCallback(ValidationBuilder.create<ModelType>());
+
+		const subValidationRules = subBuilder.validationRules.map((rule) => ({
+			...rule,
+			propertyCondition: condition,
+		})) as unknown as ValidationRule<
+			ModelType,
+			FieldType,
+			DependentFieldType
+		>[];
+
+		const newValidationRules = [
+			...this.validationRules,
+			...subValidationRules,
+		] as ValidationRule<ModelType, FieldType, DependentFieldType>[];
+
+		return new CommonBuilder<ModelType, FieldType, DependentFieldType>(
+			this.failFast,
+			newValidationRules,
+		);
 	}
 }
