@@ -21,17 +21,15 @@ export class Validation<ModelType> {
 	 * @returns The ValidationOutcome based on the ModelType.
 	 */
 	validate(state: ModelType): ValidationOutcome<ModelType> {
-		const results: ValidationResult<ModelType>[] = [];
-		let allValid = true;
-
-		for (const rule of this.validationRules) {
+		const { allValid, results } = this.validationRules.reduce((acc, rule) => {
 			const { isValid, result } = this.runValidatorsForRule(rule, state);
+			return {
+				allValid: acc.allValid && isValid,
+				results: [...acc.results, result],
+			}
+		}, { allValid: true, results: [] as ValidationResult<ModelType>[] });
 
-			results.push(result);
-			if (!isValid) allValid = false;
-		}
-
-		const result = Object.assign({}, ...results) ?? {};
+		const result = Object.assign({}, ...results);
 
 		return {
 			result,
@@ -49,19 +47,21 @@ export class Validation<ModelType> {
 		let isValid = true;
 		const result: ValidationResult<ModelType> = {};
 
-		for (const { validator, condition } of rule.validators) {
-			const value = rule.propGetter(state);
-			const dependentValue = rule.dependentFieldGetter
-				? rule.dependentFieldGetter(state)
-				: undefined;
+		const value = rule.propGetter(state);
+		const dependentValue = rule.dependentFieldGetter
+			? rule.dependentFieldGetter(state)
+			: undefined;
 
+		const validatorArgs = {
+			model: state,
+			value,
+			dependentValue,
+		};
+
+		for (const { validator, condition } of rule.validators) {
 			if (condition && !condition(state)) continue;
 
-			const isResultValid = validator({
-				model: state,
-				value,
-				dependentValue,
-			});
+			const isResultValid = validator(validatorArgs);
 
 			if (isResultValid) continue;
 
