@@ -146,4 +146,22 @@ describe("e2e-library-test", () => {
 				"Password must be at least 8 characters long",
 			);
 	});
+
+    test('should set propertyName correctly when using addRule after dependsOn', () => {
+        const builder = ValidationBuilder.create<UserModel>()
+            .forField('password', model => model.password)
+            .dependsOn(model => model.username)
+            .addRule(({ value, dependentValue }) => value === dependentValue)
+            .withMessage('Password must match username for some reason');
+
+        const validation = builder.build();
+        const model = { username: 'user', password: 'pass', active: true };
+        const outcome = validation.validate(model);
+
+        expect(outcome.isValid).toBe(false);
+        if (!outcome.isValid) {
+            expect(outcome.result.password.propertyName).toBe('password');
+            expect(outcome.result.password.message).toBe('Password must match username for some reason');
+        }
+    });
 });

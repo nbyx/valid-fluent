@@ -65,7 +65,7 @@ export class ForFieldAddedBuilder<
 		const newRule = {
 			...currentRule,
 			validators: newValidators,
-			propertyName: this.sharedState.currentAlias,
+			propertyName: this.sharedState.currentAlias || currentRule.propertyName,
 		};
 
 		const newValidationRules: ValidationRule<
