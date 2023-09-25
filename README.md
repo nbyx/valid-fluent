@@ -99,6 +99,12 @@ builder.forField('email', model => model.email).addRule(args => {
 
 You can use the **ValidatorArgs**-type to type your validator.
 
+## Upcoming Features
+- [ ] Validation Result Transformation
+- [ ] Async Validators
+- [ ] Custom Validation Error Handling
+- [ ] Validation Groups
+- [ ] Integration with Popular Libraries/Frameworks
 
 ## Contributing 🤝
 Feel free to contribute by opening issues, sending pull requests, or just by sharing your thoughts on making this package better.
