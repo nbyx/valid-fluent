@@ -37,8 +37,9 @@ jobs:
         run: npm run build
       - name: Create package.json for dist
         run: jq '.name = .name + "-dist"' package.json > dist/package.json
-      - name: Patch package.json
+      - name: Patch package.json in dist
         run: |
+          cd dist
           jq '.main = "bundle.cjs.js"' package.json > tmp.json && mv tmp.json package.json
           jq '.module = "bundle.esm.js"' package.json > tmp.json && mv tmp.json package.json
           jq '.types = "index.d.ts"' package.json > tmp.json && mv tmp.json package.json
