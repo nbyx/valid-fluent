@@ -8,7 +8,7 @@ interface UserModel {
     email?: string;
 }
 
-const usernameRule: ValidationRule<UserModel, string, never> = {
+const usernameRule: ValidationRule<UserModel, string, never, false> = {
     name: 'username',
     propertyName: 'username',
     propGetter: (model) => model.username,
@@ -20,7 +20,7 @@ const usernameRule: ValidationRule<UserModel, string, never> = {
     errorMessage: 'Username cannot be empty',
 };
 
-const ageRule: ValidationRule<UserModel, number, never> = {
+const ageRule: ValidationRule<UserModel, number, never, false> = {
     name: 'age',
     propertyName: 'age',
     propGetter: (model) => model.age,
@@ -32,7 +32,7 @@ const ageRule: ValidationRule<UserModel, number, never> = {
     errorMessage: 'Must be 18 or older',
 };
 
-const mockRules: ValidationRule<UserModel, unknown, unknown>[] = [usernameRule, ageRule] as unknown as ValidationRule<UserModel, unknown, unknown>[];
+const mockRules: ValidationRule<UserModel, unknown, unknown, false>[] = [usernameRule, ageRule] as unknown as ValidationRule<UserModel, unknown, unknown, false>[];
 
 interface AdvancedUserModel extends UserModel {
     password: string;
@@ -40,7 +40,7 @@ interface AdvancedUserModel extends UserModel {
 }
 
 // New Rule with dependent fields
-const passwordRule: ValidationRule<AdvancedUserModel, string, string> = {
+const passwordRule: ValidationRule<AdvancedUserModel, string, string, false> = {
     name: 'password',
     propertyName: 'password',
     propGetter: (model) => model.password,
@@ -111,7 +111,7 @@ describe('Validation class', () => {
                 ...ageRule,
                 propertyCondition: (model) => model.age > 100,
             },
-        ] as ValidationRule<UserModel, unknown, unknown>[]);
+        ] as ValidationRule<UserModel, unknown, unknown, false>[]);
         const model: UserModel = {
             username: 'JohnDoe',
             age: 30,
@@ -131,7 +131,7 @@ describe('Validation class', () => {
                 },
             ],
         };
-        const validation = new Validation(false, [usernameRule, modifiedAgeRule] as ValidationRule<UserModel, unknown, unknown>[]);
+        const validation = new Validation(false, [usernameRule, modifiedAgeRule] as ValidationRule<UserModel, unknown, unknown, false>[]);
         const model: UserModel = {
             username: 'JohnDoe',
             age: 30,
@@ -163,7 +163,7 @@ describe('Validation class', () => {
                 },
             ],
         };
-        const validation = new Validation(false, [usernameRule, modifiedAgeRule] as ValidationRule<UserModel, unknown, unknown>[]);
+        const validation = new Validation(false, [usernameRule, modifiedAgeRule] as ValidationRule<UserModel, unknown, unknown, false>[]);
         const model: UserModel = {
             username: '',
             age: 30,
@@ -175,7 +175,7 @@ describe('Validation class', () => {
     });
 
     test('validate handles dependent fields correctly', () => {
-        const validation = new Validation(false, [passwordRule] as ValidationRule<UserModel, unknown, unknown>[]);
+        const validation = new Validation(false, [passwordRule] as ValidationRule<UserModel, unknown, unknown, false>[]);
         const model: AdvancedUserModel = {
             username: 'JohnDoe',
             age: 30,
@@ -187,7 +187,7 @@ describe('Validation class', () => {
     });
 
     test('validate handles multiple validators for a single rule', () => {
-        const multiValidatorRule: ValidationRule<UserModel, string, never> = {
+        const multiValidatorRule: ValidationRule<UserModel, string, never, false> = {
             ...usernameRule,
             validators: [
                 {
@@ -199,7 +199,7 @@ describe('Validation class', () => {
             ],
             errorMessage: 'Username must be at least 3 characters',
         };
-        const validation = new Validation(false, [multiValidatorRule] as unknown as ValidationRule<UserModel, unknown, unknown>[]);
+        const validation = new Validation(false, [multiValidatorRule] as unknown as ValidationRule<UserModel, unknown, unknown, false>[]);
         const model: UserModel = {
             username: 'Jo',
             age: 30,
@@ -210,11 +210,11 @@ describe('Validation class', () => {
     });
 
     test('validate handles dynamic error messages', () => {
-        const dynamicMessageRule: ValidationRule<UserModel, number, never> = {
+        const dynamicMessageRule: ValidationRule<UserModel, number, never, false> = {
             ...ageRule,
             errorMessage: (model) => `Must be 18 or older, you are ${model.age}`,
         };
-        const validation = new Validation(false, [dynamicMessageRule ] as unknown as ValidationRule<UserModel, unknown, unknown>[]);
+        const validation = new Validation(false, [dynamicMessageRule ] as unknown as ValidationRule<UserModel, unknown, unknown, false>[]);
         const model: UserModel = {
             username: 'JohnDoe',
             age: 17,
@@ -226,7 +226,7 @@ describe('Validation class', () => {
     });
 
     test('validate does not mutate the input model', () => {
-        const validation = new Validation(false, [usernameRule, ageRule] as unknown as ValidationRule<UserModel, unknown, unknown>[]);
+        const validation = new Validation(false, [usernameRule, ageRule] as unknown as ValidationRule<UserModel, unknown, unknown, false>[]);
         const model: UserModel = {
             username: 'JohnDoe',
             age: 30,

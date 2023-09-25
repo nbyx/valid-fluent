@@ -7,7 +7,7 @@ interface DummyModel {
     field2: number;
 }
 
-const dummyRule1: ValidationRule<DummyModel, string, never> = {
+const dummyRule1: ValidationRule<DummyModel, string, never, false> = {
     name: 'field1',
     propertyName: 'field1',
     propGetter: model => model.field1,
@@ -15,7 +15,7 @@ const dummyRule1: ValidationRule<DummyModel, string, never> = {
     errorMessage: 'Initial error message 1',
 };
 
-const dummyRule2: ValidationRule<DummyModel, number, never> = {
+const dummyRule2: ValidationRule<DummyModel, number, never, false> = {
     name: 'field2',
     propertyName: 'field2',
     propGetter: model => model.field2,
@@ -23,19 +23,26 @@ const dummyRule2: ValidationRule<DummyModel, number, never> = {
     errorMessage: 'Initial error message 2',
 };
 
+const sharedState = {
+    validationRules: [],
+    currentFieldStartIndex: 0,
+    currentAlias: null,
+    failFast: true,
+};
+
 describe('RuleAddedBuilder class', () => {
     test('withMessage updates the last rule\'s error message', () => {
-        const builder = new RuleAddedBuilder<DummyModel, string | number, never>(true, [dummyRule1, dummyRule2] as ValidationRule<DummyModel, string | number, never>[]);
+        const builder = new RuleAddedBuilder<DummyModel, string | number, never>({...sharedState, validationRules: [dummyRule1, dummyRule2] as ValidationRule<DummyModel, string | number, never, false>[]});
         const updatedBuilder = builder.withMessage('Updated error message');
-        const updatedRules = (updatedBuilder as any).validationRules;
+        const updatedRules = (updatedBuilder as any).sharedState.validationRules;
 
         expect(updatedRules[1].errorMessage).toBe('Updated error message');
     });
 
     test('withMessage does nothing when no rules are present', () => {
-        const builder = new RuleAddedBuilder<DummyModel, string | number, never>();
+        const builder = new RuleAddedBuilder<DummyModel, string | number, never>(sharedState);
         const updatedBuilder = builder.withMessage('Updated error message');
-        const updatedRules = (updatedBuilder as any).validationRules;
+        const updatedRules = (updatedBuilder as any).sharedState.validationRules;
 
         expect(updatedRules).toEqual([]);
     });

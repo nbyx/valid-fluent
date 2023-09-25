@@ -7,6 +7,11 @@ export class ValidationBuilder {
 	 * @returnsA new ValidationBuilder instance
 	 */
 	static create<ModelType>(failFast = true): InitialBuilder<ModelType> {
-		return new InitialBuilder<ModelType>(failFast, []);
+		return new InitialBuilder<ModelType>({
+			validationRules: [],
+			currentFieldStartIndex: 0,
+			currentAlias: null,
+			failFast,
+		});
 	}
 }

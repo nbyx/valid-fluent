@@ -1,17 +1,16 @@
-import { NestedPropGetter, ValidationRule } from "../../../types/validation.types";
+import {NestedPropGetter, SharedBuilderState, ValidationRule} from "../../../types/validation.types";
 import { ForFieldAddedBuilder } from "../for-field-added-builder/for-field-added-builder";
 
 export class InitialBuilder<
 	ModelType,
 	FieldType = unknown,
 	DependentFieldType = unknown,
+	DependsOnCalled = false,
 > {
 	constructor(
-		protected readonly failFast: boolean = true,
-		protected readonly validationRules: ReadonlyArray<
-			ValidationRule<ModelType, FieldType, DependentFieldType>
-		> = [],
-	) {}
+		private readonly sharedState: SharedBuilderState<ModelType, FieldType, DependentFieldType, DependsOnCalled>
+	) {
+	}
 	private readonly NO_ERROR_MESSAGE = "No error message set for this rule";
 
 	/**
@@ -23,8 +22,10 @@ export class InitialBuilder<
 	forField<NewFieldType>(
 		name: Extract<keyof ModelType, string>,
 		propGetter: NestedPropGetter<ModelType, NewFieldType>,
-	): ForFieldAddedBuilder<ModelType, NewFieldType, DependentFieldType> {
-		const newRule: ValidationRule<ModelType, NewFieldType, DependentFieldType> =
+	): ForFieldAddedBuilder<ModelType, NewFieldType, DependentFieldType, false> {
+		this.sharedState.currentFieldStartIndex = this.sharedState.validationRules.length;
+
+		const newRule: ValidationRule<ModelType, NewFieldType, DependentFieldType, false> =
 			{
 				name,
 				propGetter,
@@ -33,18 +34,20 @@ export class InitialBuilder<
 				propertyName: name,
 			};
 		const newValidationRules = [
-			...this.validationRules,
+			...this.sharedState.validationRules,
 			newRule,
 		] as unknown as ValidationRule<
 			ModelType,
 			NewFieldType,
-			DependentFieldType
+			DependentFieldType,
+			false
 		>[];
 
 		return new ForFieldAddedBuilder<
 			ModelType,
 			NewFieldType,
-			DependentFieldType
-		>(this.failFast, newValidationRules);
+			DependentFieldType,
+			false
+		>({ ... this.sharedState, validationRules: newValidationRules });
 	}
 }

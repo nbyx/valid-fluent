@@ -1,7 +1,7 @@
 import {
 	ValidationOutcome,
 	ValidationResult,
-	ValidationRule,
+	ValidationRule, ValidatorArgs,
 } from "../../types/validation.types";
 import { createValidationOutcome } from "../utils/validation.util";
 import {isNonEmptyObject} from "../utils/misc.util";
@@ -12,7 +12,8 @@ export class Validation<ModelType> {
 		private readonly validationRules: ValidationRule<
 			ModelType,
 			unknown,
-			unknown
+			unknown,
+			false
 		>[],
 	) {}
 
@@ -43,7 +44,7 @@ export class Validation<ModelType> {
 	}
 
 	private runValidatorsForRule(
-		rule: ValidationRule<ModelType, unknown, unknown>,
+		rule: ValidationRule<ModelType, unknown, unknown, false>,
 		state: ModelType,
 	): ValidationOutcome<ModelType> {
 		if (rule.propertyCondition && !rule.propertyCondition(state))
@@ -66,7 +67,7 @@ export class Validation<ModelType> {
 		for (const {validator, condition} of rule.validators) {
 			if (condition && !condition(state)) continue;
 
-			const isResultValid = validator(validatorArgs);
+			const isResultValid = validator(validatorArgs as ValidatorArgs<ModelType, unknown, unknown, false>);
 
 			if (isResultValid) continue;
 

@@ -1,12 +1,9 @@
-import { ValidationRule } from "../../../types/validation.types";
+import {SharedBuilderState, ValidationRule} from "../../../types/validation.types";
 import { CommonBuilder } from "../common-builder/common-builder";
 
-export class RuleAddedBuilder<ModelType, FieldType, DependentFieldType> {
+export class RuleAddedBuilder<ModelType, FieldType, DependentFieldType, DependsOnCalled = false> {
 	constructor(
-		private readonly failFast: boolean = true,
-		private readonly validationRules: ReadonlyArray<
-			ValidationRule<ModelType, FieldType, DependentFieldType>
-		> = [],
+		private readonly sharedState: SharedBuilderState<ModelType, FieldType, DependentFieldType, DependsOnCalled>
 	) {}
 
 	/**
@@ -15,24 +12,25 @@ export class RuleAddedBuilder<ModelType, FieldType, DependentFieldType> {
 	 */
 	withMessage(
 		errorMessage: string | ((model: ModelType) => string),
-	): CommonBuilder<ModelType, FieldType, DependentFieldType> {
-		const lastRuleIndex = this.validationRules.length - 1;
+	): CommonBuilder<ModelType, FieldType, DependentFieldType, DependsOnCalled> {
+		const lastRuleIndex = this.sharedState.validationRules.length - 1;
 		if (lastRuleIndex >= 0) {
-			const lastRule = { ...this.validationRules[lastRuleIndex], errorMessage } as ValidationRule<ModelType, FieldType, DependentFieldType>;
+			const lastRule = { ...this.sharedState.validationRules[lastRuleIndex], errorMessage } as ValidationRule<ModelType, FieldType, DependentFieldType, DependsOnCalled>;
 			const newValidationRules = [
-				...this.validationRules.slice(0, lastRuleIndex),
+				...this.sharedState.validationRules.slice(0, lastRuleIndex),
 				lastRule,
 			];
 
-			return new CommonBuilder<ModelType, FieldType, DependentFieldType>(
-				this.failFast,
-				newValidationRules,
+			return new CommonBuilder<ModelType, FieldType, DependentFieldType, DependsOnCalled>(
+				{
+					...this.sharedState,
+					validationRules: newValidationRules,
+				}
 			);
 		}
 
-		return new CommonBuilder<ModelType, FieldType, DependentFieldType>(
-			this.failFast,
-			this.validationRules,
+		return new CommonBuilder<ModelType, FieldType, DependentFieldType, DependsOnCalled>(
+		this.sharedState
 		);
 	}
 }

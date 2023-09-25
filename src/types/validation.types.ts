@@ -1,12 +1,12 @@
 export type ValidationMessage = string;
-export type ValidatorArgs<ModelType, ValueType, DependentFieldType> = {
+export type ValidatorArgs<ModelType, ValueType, DependentFieldType, DependsOnCalled> = {
 	model: ModelType;
 	value: ValueType;
-	dependentValue?: DependentFieldType;
+	dependentValue: DependsOnCalled extends true ? DependentFieldType : undefined;
 };
 
-export type Validator<ModelType, ValueType, DependentFieldType> = (
-	args: ValidatorArgs<ModelType, ValueType, DependentFieldType>,
+export type Validator<ModelType, ValueType, DependentFieldType, DependsOnCalled> = (
+	args: ValidatorArgs<ModelType, ValueType, DependentFieldType, DependsOnCalled>,
 ) => boolean;
 
 export type ValidationResult<Shape> = {
@@ -29,19 +29,26 @@ export type NestedPropGetter<ModelType, PropType> = (
 	model: ModelType,
 ) => PropType;
 
-export type BuilderValidator<ModelType, FieldValueType, DependentValueType> = {
-	validator: Validator<ModelType, FieldValueType, DependentValueType>;
+export type BuilderValidator<ModelType, FieldValueType, DependentValueType, DependsOnCalled> = {
+	validator: Validator<ModelType, FieldValueType, DependentValueType, DependsOnCalled>;
 	condition?: ((model: ModelType) => boolean) | undefined;
 };
 
 export type ModelValueType<ModelType> = ModelType[keyof ModelType];
 
-export type ValidationRule<ModelType, FieldValue, DependentValueType> = {
+export type ValidationRule<ModelType, FieldValue, DependentValueType, DependsOnCalled> = {
 	name: keyof ModelType;
 	propGetter: NestedPropGetter<ModelType, FieldValue>;
 	dependentFieldGetter?: NestedPropGetter<ModelType, DependentValueType>;
-	validators: BuilderValidator<ModelType, FieldValue, DependentValueType>[];
+	validators: BuilderValidator<ModelType, FieldValue, DependentValueType, DependsOnCalled>[];
 	propertyCondition?: (model: ModelType) => boolean;
 	errorMessage: string | ((model: ModelType) => string);
 	propertyName: string;
 };
+
+export interface SharedBuilderState<ModelType, FieldType, DependentFieldType, DependsOnCalled> {
+	failFast: boolean;
+	validationRules: ReadonlyArray<ValidationRule<ModelType, FieldType, DependentFieldType, DependsOnCalled>>;
+	currentAlias: string | null;
+	currentFieldStartIndex: number;
+}
