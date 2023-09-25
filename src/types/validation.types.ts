@@ -10,13 +10,20 @@ export type Validator<ModelType, ValueType, DependentFieldType> = (
 ) => boolean;
 
 export type ValidationResult<Shape> = {
-	[key in keyof Shape]?: { propertyName: string; message: ValidationMessage };
+	[key in keyof Shape]: { propertyName: string; message: ValidationMessage };
 };
 
-export type ValidationOutcome<Shape> = {
+export type ValidationSuccess = {
+	isValid: true;
+	result: {}
+}
+
+export type ValidationError<Shape> = {
+	isValid: false;
 	result: ValidationResult<Shape>;
-	isValid: boolean;
-};
+}
+
+export type ValidationOutcome<Shape> = ValidationSuccess | ValidationError<Shape>;
 
 export type NestedPropGetter<ModelType, PropType> = (
 	model: ModelType,
@@ -35,6 +42,6 @@ export type ValidationRule<ModelType, FieldValue, DependentValueType> = {
 	dependentFieldGetter?: NestedPropGetter<ModelType, DependentValueType>;
 	validators: BuilderValidator<ModelType, FieldValue, DependentValueType>[];
 	propertyCondition?: (model: ModelType) => boolean;
-	errorMessage: string;
+	errorMessage: string | ((model: ModelType) => string);
 	propertyName: string;
 };

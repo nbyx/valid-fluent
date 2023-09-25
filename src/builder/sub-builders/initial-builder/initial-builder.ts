@@ -1,5 +1,5 @@
-import { NestedPropGetter, ValidationRule } from "../../types/validation.types";
-import { ForFieldAddedBuilder } from "./for-field-added-builder";
+import { NestedPropGetter, ValidationRule } from "../../../types/validation.types";
+import { ForFieldAddedBuilder } from "../for-field-added-builder/for-field-added-builder";
 
 export class InitialBuilder<
 	ModelType,

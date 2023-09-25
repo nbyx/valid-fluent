@@ -1,4 +1,4 @@
-import { InitialBuilder } from "./sub-builders/initial-builder";
+import { InitialBuilder } from "./sub-builders/initial-builder/initial-builder";
 
 export class ValidationBuilder {
 	/**

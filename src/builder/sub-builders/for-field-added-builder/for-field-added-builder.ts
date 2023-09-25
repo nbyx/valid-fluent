@@ -3,10 +3,10 @@ import {
 	NestedPropGetter,
 	ValidationRule,
 	Validator,
-} from "../../types/validation.types";
-import { RuleAddedBuilder } from "./rule-added-builder";
-import { InitialBuilder } from "./initial-builder";
-import { CommonBuilder } from "./common-builder";
+} from "../../../types/validation.types";
+import { RuleAddedBuilder } from "../rule-added-builder/rule-added-builder";
+import { InitialBuilder } from "../initial-builder/initial-builder";
+import { CommonBuilder } from "../common-builder/common-builder";
 
 export class ForFieldAddedBuilder<ModelType, FieldType, DependentFieldType> {
 	constructor(

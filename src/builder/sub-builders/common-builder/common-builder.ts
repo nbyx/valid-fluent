@@ -1,8 +1,8 @@
-import { NestedPropGetter, ValidationRule } from "../../types/validation.types";
-import { ValidationBuilder } from "../validation-builder";
-import { ForFieldAddedBuilder } from "./for-field-added-builder";
-import { InitialBuilder } from "./initial-builder";
-import { Validation } from "../validation/validation";
+import { NestedPropGetter, ValidationRule } from "../../../types/validation.types";
+import { ValidationBuilder } from "../../validation-builder";
+import { ForFieldAddedBuilder } from "../for-field-added-builder/for-field-added-builder";
+import { InitialBuilder } from "../initial-builder/initial-builder";
+import { Validation } from "../../validation/validation";
 
 export class CommonBuilder<ModelType, FieldType, DependentFieldType> {
 	constructor(

@@ -1,6 +1,6 @@
 import { test, expect } from "vitest";
 import { ValidationBuilder } from "./validation-builder";
-import { InitialBuilder } from "./sub-builders/initial-builder"; // Import the InitialBuilder class, adjust the path as needed
+import { InitialBuilder } from "./sub-builders/initial-builder/initial-builder"; // Import the InitialBuilder class, adjust the path as needed
 
 test("ValidationBuilder.create returns an InitialBuilder instance", () => {
 	const builder = ValidationBuilder.create<number>();
