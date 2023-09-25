@@ -1,23 +1,33 @@
-import {NestedPropGetter, SharedBuilderState, ValidationRule} from "../../../types/validation.types";
+import {
+	NestedPropGetter,
+	SharedBuilderState,
+	ValidationRule,
+} from "../../../types/validation.types";
 import { ValidationBuilder } from "../../validation-builder";
 import { ForFieldAddedBuilder } from "../for-field-added-builder/for-field-added-builder";
 import { InitialBuilder } from "../initial-builder/initial-builder";
 import { Validation } from "../../validation/validation";
 
-export class CommonBuilder<ModelType, FieldType, DependentFieldType, DependsOnCalled = false> {
+export class CommonBuilder<
+	ModelType,
+	FieldType,
+	DependentFieldType,
+	DependsOnCalled = false,
+> {
 	constructor(
-		private readonly sharedState: SharedBuilderState<ModelType, FieldType, DependentFieldType, DependsOnCalled>
-	) {
-	}
+		private readonly sharedState: SharedBuilderState<
+			ModelType,
+			FieldType,
+			DependentFieldType,
+			DependsOnCalled
+		>,
+	) {}
 
 	forField<NewFieldType>(
 		name: Extract<keyof ModelType, string>,
 		propGetter: NestedPropGetter<ModelType, NewFieldType>,
 	): ForFieldAddedBuilder<ModelType, NewFieldType, DependentFieldType> {
-		return new InitialBuilder(this.sharedState).forField(
-			name,
-			propGetter,
-		);
+		return new InitialBuilder(this.sharedState).forField(name, propGetter);
 	}
 
 	/**
@@ -39,7 +49,10 @@ export class CommonBuilder<ModelType, FieldType, DependentFieldType, DependsOnCa
 		if (this.sharedState.validationRules.length === 0)
 			throw new Error("Call 'forProperty' before using 'when'");
 
-		const currentRule = this.sharedState.validationRules[this.sharedState.validationRules.length - 1];
+		const currentRule =
+			this.sharedState.validationRules[
+				this.sharedState.validationRules.length - 1
+			];
 		if (!currentRule)
 			throw new Error("A precondition is not met: 'currentRule' is not set.");
 
@@ -70,13 +83,20 @@ export class CommonBuilder<ModelType, FieldType, DependentFieldType, DependsOnCa
 		]);
 	}
 
-	private handleBuilderCallback<Field, DependentField>(builderCallback: (builder: InitialBuilder<ModelType, unknown, unknown>) => CommonBuilder<ModelType, Field, DependentField>, condition: (model: ModelType) => boolean) {
+	private handleBuilderCallback<Field, DependentField>(
+		builderCallback: (
+			builder: InitialBuilder<ModelType, unknown, unknown>,
+		) => CommonBuilder<ModelType, Field, DependentField>,
+		condition: (model: ModelType) => boolean,
+	) {
 		const subBuilder = builderCallback(ValidationBuilder.create<ModelType>());
 
-		const subValidationRules = subBuilder.sharedState.validationRules.map((rule) => ({
-			...rule,
-			propertyCondition: condition,
-		})) as unknown as ValidationRule<
+		const subValidationRules = subBuilder.sharedState.validationRules.map(
+			(rule) => ({
+				...rule,
+				propertyCondition: condition,
+			}),
+		) as unknown as ValidationRule<
 			ModelType,
 			FieldType,
 			DependentFieldType,
@@ -86,11 +106,18 @@ export class CommonBuilder<ModelType, FieldType, DependentFieldType, DependsOnCa
 		const newValidationRules = [
 			...this.sharedState.validationRules,
 			...subValidationRules,
-		] as ValidationRule<ModelType, FieldType, DependentFieldType, DependsOnCalled>[];
+		] as ValidationRule<
+			ModelType,
+			FieldType,
+			DependentFieldType,
+			DependsOnCalled
+		>[];
 
-		return new CommonBuilder<ModelType, FieldType, DependentFieldType, DependsOnCalled>(
-			{...this.sharedState,
-			validationRules: newValidationRules,}
-		);
+		return new CommonBuilder<
+			ModelType,
+			FieldType,
+			DependentFieldType,
+			DependsOnCalled
+		>({ ...this.sharedState, validationRules: newValidationRules });
 	}
 }

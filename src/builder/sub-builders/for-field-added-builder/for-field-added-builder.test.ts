@@ -1,115 +1,133 @@
-import {beforeEach, describe, expect, test } from 'vitest';
-import { ForFieldAddedBuilder } from './for-field-added-builder';
-import {InitialBuilder} from "../initial-builder/initial-builder";
-import {SharedBuilderState} from "../../../types/validation.types"; // Adjust the import to your project structure
+import { beforeEach, describe, expect, test } from "vitest";
+import { ForFieldAddedBuilder } from "./for-field-added-builder";
+import { InitialBuilder } from "../initial-builder/initial-builder";
+import { SharedBuilderState } from "../../../types/validation.types"; // Adjust the import to your project structure
 
 interface TestModel {
-    field1: string;
-    field2: number;
-    field3: boolean;
+	field1: string;
+	field2: number;
+	field3: boolean;
 }
 
-describe('ForFieldAddedBuilder class', () => {
-    let sharedState: SharedBuilderState<TestModel, unknown, unknown, false>;
+describe("ForFieldAddedBuilder class", () => {
+	let sharedState: SharedBuilderState<TestModel, unknown, unknown, false>;
 
-    beforeEach(() => {
-       sharedState  = {
-           validationRules: [],
-           currentFieldStartIndex: 0,
-           currentAlias: null,
-           failFast: true
-       };
-    })
+	beforeEach(() => {
+		sharedState = {
+			validationRules: [],
+			currentFieldStartIndex: 0,
+			currentAlias: null,
+			failFast: true,
+		};
+	});
 
-    test('addRule without prior forField call', () => {
-        expect(() => {
-            new ForFieldAddedBuilder<TestModel, unknown, unknown>({
-                validationRules: [],
-                currentFieldStartIndex: 0,
-                currentAlias: null,
-                failFast: true,
-            }).addRule(({ value }) => value !== '');
-        }).toThrow(Error);
-    });
+	test("addRule without prior forField call", () => {
+		expect(() => {
+			new ForFieldAddedBuilder<TestModel, unknown, unknown>({
+				validationRules: [],
+				currentFieldStartIndex: 0,
+				currentAlias: null,
+				failFast: true,
+			}).addRule(({ value }) => value !== "");
+		}).toThrow(Error);
+	});
 
-    test('addRule with condition', () => {
-        const builder = new InitialBuilder<TestModel, unknown, unknown>(sharedState)
-            .forField('field1', model => model.field1)
-            .addRule(({ value }) => value !== '', model => model.field1 !== '')
-            .withMessage('test error message');
+	test("addRule with condition", () => {
+		const builder = new InitialBuilder<TestModel, unknown, unknown>(sharedState)
+			.forField("field1", (model) => model.field1)
+			.addRule(
+				({ value }) => value !== "",
+				(model) => model.field1 !== "",
+			)
+			.withMessage("test error message");
 
-        const validation = builder.build();
-        const model = { field1: 'test', field2: 10, field3: true };
-        const outcome = validation.validate(model);
+		const validation = builder.build();
+		const model = { field1: "test", field2: 10, field3: true };
+		const outcome = validation.validate(model);
 
-        expect(outcome.isValid).toBe(true);
-    });
+		expect(outcome.isValid).toBe(true);
+	});
 
-    test('aliasAs without prior forField call', () => {
-        expect(() => {
-            new ForFieldAddedBuilder<TestModel, unknown, unknown>(sharedState).aliasAs('alias');
-        }).toThrow(Error);
-    });
+	test("aliasAs without prior forField call", () => {
+		expect(() => {
+			new ForFieldAddedBuilder<TestModel, unknown, unknown>(
+				sharedState,
+			).aliasAs("alias");
+		}).toThrow(Error);
+	});
 
-    test('aliasAs changes property name', () => {
-        const initialBuilder = new InitialBuilder<TestModel, unknown, unknown>(sharedState);
-        const builder = initialBuilder
-            .forField('field1', model => model.field1)
-                .aliasAs('alias')
-                .addRule(({ value }) => value !== '')
-                .withMessage('error message');
+	test("aliasAs changes property name", () => {
+		const initialBuilder = new InitialBuilder<TestModel, unknown, unknown>(
+			sharedState,
+		);
+		const builder = initialBuilder
+			.forField("field1", (model) => model.field1)
+			.aliasAs("alias")
+			.addRule(({ value }) => value !== "")
+			.withMessage("error message");
 
-        const validation = builder.build();
-        const model = { field1: '', field2: 10, field3: true };
-        const outcome = validation.validate(model);
-        expect(outcome.result).toHaveProperty('field1');
-        expect(outcome.isValid).toBe(false);
-        if (!outcome.isValid)
-        expect(outcome.result.field1.propertyName).toBe('alias');
-    });
+		const validation = builder.build();
+		const model = { field1: "", field2: 10, field3: true };
+		const outcome = validation.validate(model);
+		expect(outcome.result).toHaveProperty("field1");
+		expect(outcome.isValid).toBe(false);
+		if (!outcome.isValid)
+			expect(outcome.result.field1.propertyName).toBe("alias");
+	});
 
-    test('dependsOn without prior forField call', () => {
-        expect(() => {
-            new ForFieldAddedBuilder<TestModel, unknown, unknown>(sharedState).dependsOn(model => model.field2);
-        }).toThrow(Error);
-    });
+	test("dependsOn without prior forField call", () => {
+		expect(() => {
+			new ForFieldAddedBuilder<TestModel, unknown, unknown>(
+				sharedState,
+			).dependsOn((model) => model.field2);
+		}).toThrow(Error);
+	});
 
-    test('dependsOn sets dependentFieldGetter', () => {
-        const initialBuilder = new InitialBuilder<TestModel>(sharedState);
-        const builder = initialBuilder
-            .forField('field1', model => model.field1)
-            .dependsOn(model => model.field2)
-            .addRule(({ value, dependentValue }) => value !== dependentValue.toString())
-            .withMessage('test error message');
+	test("dependsOn sets dependentFieldGetter", () => {
+		const initialBuilder = new InitialBuilder<TestModel>(sharedState);
+		const builder = initialBuilder
+			.forField("field1", (model) => model.field1)
+			.dependsOn((model) => model.field2)
+			.addRule(
+				({ value, dependentValue }) => value !== dependentValue.toString(),
+			)
+			.withMessage("test error message");
 
-        const validation = builder.build();
-        const model = { field1: '10', field2: 10, field3: true };
-        const outcome = validation.validate(model);
-        expect(outcome.isValid).toBe(false); // Assuming you want string and number to be different
-    });
+		const validation = builder.build();
+		const model = { field1: "10", field2: 10, field3: true };
+		const outcome = validation.validate(model);
+		expect(outcome.isValid).toBe(false); // Assuming you want string and number to be different
+	});
 
-    test('when sets condition on last rule', () => {
-        const builder = new InitialBuilder<TestModel, unknown, unknown>(sharedState)
-            .forField('field2', model => model.field2)
-            .addRule(({ value }) => value === 12)
-            .withMessage('test error')
-            .when(model => model.field1 === '');
-        // Assuming you have a build() method to finalize the builder
-        const validation = builder.build();
-        const model = { field1: 'test', field2: 10, field3: true };
-        const outcome = validation.validate(model);
-        expect(outcome.isValid).toBe(true);
-    });
+	test("when sets condition on last rule", () => {
+		const builder = new InitialBuilder<TestModel, unknown, unknown>(sharedState)
+			.forField("field2", (model) => model.field2)
+			.addRule(({ value }) => value === 12)
+			.withMessage("test error")
+			.when((model) => model.field1 === "");
+		// Assuming you have a build() method to finalize the builder
+		const validation = builder.build();
+		const model = { field1: "test", field2: 10, field3: true };
+		const outcome = validation.validate(model);
+		expect(outcome.isValid).toBe(true);
+	});
 
-    test('when with builderCallback', () => {
-        const builder = new ForFieldAddedBuilder<TestModel, unknown, unknown>(sharedState)
-            .when(model => model.field1 !== '', subBuilder => {
-                return subBuilder.forField('field1', model => model.field1).addRule(({ value }) => value !== '').withMessage('test error');
-            });
-        // Assuming you have a build() method to finalize the builder
-        const validation = builder.build();
-        const model = { field1: 'test', field2: 10, field3: true };
-        const outcome = validation.validate(model);
-        expect(outcome.isValid).toBe(true);
-    });
+	test("when with builderCallback", () => {
+		const builder = new ForFieldAddedBuilder<TestModel, unknown, unknown>(
+			sharedState,
+		).when(
+			(model) => model.field1 !== "",
+			(subBuilder) => {
+				return subBuilder
+					.forField("field1", (model) => model.field1)
+					.addRule(({ value }) => value !== "")
+					.withMessage("test error");
+			},
+		);
+		// Assuming you have a build() method to finalize the builder
+		const validation = builder.build();
+		const model = { field1: "test", field2: 10, field3: true };
+		const outcome = validation.validate(model);
+		expect(outcome.isValid).toBe(true);
+	});
 });

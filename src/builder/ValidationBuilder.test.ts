@@ -9,8 +9,10 @@ test("ValidationBuilder.create returns an InitialBuilder instance", () => {
 
 test("ValidationBuilder.create respects failFast parameter", () => {
 	const failFastBuilder = ValidationBuilder.create<number>(true);
+	// rome-ignore lint: only for test
 	expect((failFastBuilder as any).sharedState.failFast).toBe(true);
 
 	const nonFailFastBuilder = ValidationBuilder.create<number>(false);
+	// rome-ignore lint: only for test
 	expect((nonFailFastBuilder as any).sharedState.failFast).toBe(false);
 });

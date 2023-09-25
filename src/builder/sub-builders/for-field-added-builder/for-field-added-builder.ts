@@ -1,6 +1,7 @@
 import {
 	BuilderValidator,
-	NestedPropGetter, SharedBuilderState,
+	NestedPropGetter,
+	SharedBuilderState,
 	ValidationRule,
 	Validator,
 } from "../../../types/validation.types";
@@ -8,11 +9,20 @@ import { RuleAddedBuilder } from "../rule-added-builder/rule-added-builder";
 import { InitialBuilder } from "../initial-builder/initial-builder";
 import { CommonBuilder } from "../common-builder/common-builder";
 
-export class ForFieldAddedBuilder<ModelType, FieldType, DependentFieldType, DependsOnCalled = false> {
+export class ForFieldAddedBuilder<
+	ModelType,
+	FieldType,
+	DependentFieldType,
+	DependsOnCalled = false,
+> {
 	constructor(
-		private readonly sharedState: SharedBuilderState<ModelType, FieldType, DependentFieldType, DependsOnCalled>
-	) {
-	}
+		private readonly sharedState: SharedBuilderState<
+			ModelType,
+			FieldType,
+			DependentFieldType,
+			DependsOnCalled
+		>,
+	) {}
 
 	/**
 	 * Adds a validator function for the latest property rule
@@ -21,9 +31,19 @@ export class ForFieldAddedBuilder<ModelType, FieldType, DependentFieldType, Depe
 	 * @returns ValidationBuilder A new ValidationBuilder instance with the added validator
 	 */
 	addRule(
-		validator: Validator<ModelType, FieldType, DependentFieldType, DependsOnCalled>,
+		validator: Validator<
+			ModelType,
+			FieldType,
+			DependentFieldType,
+			DependsOnCalled
+		>,
 		condition?: (model: ModelType) => boolean,
-	): RuleAddedBuilder<ModelType, FieldType, DependentFieldType, DependsOnCalled> {
+	): RuleAddedBuilder<
+		ModelType,
+		FieldType,
+		DependentFieldType,
+		DependsOnCalled
+	> {
 		if (this.sharedState.validationRules.length === 0)
 			throw new Error("Call 'forField' before using 'addRule'");
 		const newValidator: BuilderValidator<
@@ -35,9 +55,18 @@ export class ForFieldAddedBuilder<ModelType, FieldType, DependentFieldType, Depe
 
 		const currentRule = this.sharedState.validationRules[
 			this.sharedState.validationRules.length - 1
-		] as ValidationRule<ModelType, FieldType, DependentFieldType, DependsOnCalled>;
+		] as ValidationRule<
+			ModelType,
+			FieldType,
+			DependentFieldType,
+			DependsOnCalled
+		>;
 		const newValidators = [...currentRule.validators, newValidator];
-		const newRule = { ...currentRule, validators: newValidators, propertyName: this.sharedState.currentAlias };
+		const newRule = {
+			...currentRule,
+			validators: newValidators,
+			propertyName: this.sharedState.currentAlias,
+		};
 
 		const newValidationRules: ValidationRule<
 			ModelType,
@@ -47,9 +76,19 @@ export class ForFieldAddedBuilder<ModelType, FieldType, DependentFieldType, Depe
 		>[] = [
 			...this.sharedState.validationRules.slice(0, -1),
 			newRule,
-		] as unknown as ValidationRule<ModelType, FieldType, DependentFieldType, DependsOnCalled>[];
+		] as unknown as ValidationRule<
+			ModelType,
+			FieldType,
+			DependentFieldType,
+			DependsOnCalled
+		>[];
 
-		return new RuleAddedBuilder<ModelType, FieldType, DependentFieldType, DependsOnCalled>({...this.sharedState, validationRules: newValidationRules });
+		return new RuleAddedBuilder<
+			ModelType,
+			FieldType,
+			DependentFieldType,
+			DependsOnCalled
+		>({ ...this.sharedState, validationRules: newValidationRules });
 	}
 
 	/**
@@ -58,29 +97,47 @@ export class ForFieldAddedBuilder<ModelType, FieldType, DependentFieldType, Depe
 	 */
 	aliasAs(
 		name: string,
-	): ForFieldAddedBuilder<ModelType, FieldType, DependentFieldType, DependsOnCalled> {
-		if (this.sharedState.validationRules.length === 0) throw new Error("Call 'forField' before using 'aliasAs'");
+	): ForFieldAddedBuilder<
+		ModelType,
+		FieldType,
+		DependentFieldType,
+		DependsOnCalled
+	> {
+		if (this.sharedState.validationRules.length === 0)
+			throw new Error("Call 'forField' before using 'aliasAs'");
 
 		const startIndex = this.sharedState.currentFieldStartIndex || 0;
 		const endIndex = this.sharedState.validationRules.length;
 
-		const updatedRules = this.sharedState.validationRules.slice(startIndex, endIndex).map(rule => ({
-			...rule,
-			propertyName: name,
-		}));
+		const updatedRules = this.sharedState.validationRules
+			.slice(startIndex, endIndex)
+			.map((rule) => ({
+				...rule,
+				propertyName: name,
+			}));
 
 		const newValidationRules = [
 			...this.sharedState.validationRules.slice(0, startIndex),
 			...updatedRules,
-		] as ValidationRule<ModelType, FieldType, DependentFieldType, DependsOnCalled>[];
+		] as ValidationRule<
+			ModelType,
+			FieldType,
+			DependentFieldType,
+			DependsOnCalled
+		>[];
 
 		const newSharedState = {
 			...this.sharedState,
 			validationRules: newValidationRules,
-			currentAlias: name
+			currentAlias: name,
 		};
 
-		return new ForFieldAddedBuilder<ModelType, FieldType, DependentFieldType, DependsOnCalled>(newSharedState);
+		return new ForFieldAddedBuilder<
+			ModelType,
+			FieldType,
+			DependentFieldType,
+			DependsOnCalled
+		>(newSharedState);
 	}
 
 	/**
@@ -94,10 +151,16 @@ export class ForFieldAddedBuilder<ModelType, FieldType, DependentFieldType, Depe
 		if (this.sharedState.validationRules.length === 0)
 			throw new Error("Call 'forField' before using 'dependsOn'");
 
-		const currentRule = this.sharedState.validationRules[this.sharedState.validationRules.length - 1];
+		const currentRule =
+			this.sharedState.validationRules[
+				this.sharedState.validationRules.length - 1
+			];
 		const updatedRule = { ...currentRule, dependentFieldGetter };
 		const newValidationRules = [
-			...this.sharedState.validationRules.slice(0, this.sharedState.validationRules.length - 1),
+			...this.sharedState.validationRules.slice(
+				0,
+				this.sharedState.validationRules.length - 1,
+			),
 			updatedRule,
 		] as unknown as ValidationRule<
 			ModelType,
@@ -111,7 +174,7 @@ export class ForFieldAddedBuilder<ModelType, FieldType, DependentFieldType, Depe
 			FieldType,
 			NewDependentFieldType,
 			true
-		>({...this.sharedState, validationRules: newValidationRules});
+		>({ ...this.sharedState, validationRules: newValidationRules });
 	}
 
 	when<Field, DependentField>(
@@ -120,6 +183,11 @@ export class ForFieldAddedBuilder<ModelType, FieldType, DependentFieldType, Depe
 			builder: InitialBuilder<ModelType, unknown, unknown>,
 		) => CommonBuilder<ModelType, Field, DependentField>,
 	): CommonBuilder<ModelType, FieldType, DependentFieldType, DependsOnCalled> {
-		return new CommonBuilder<ModelType, FieldType, DependentFieldType, DependsOnCalled>(this.sharedState).when(condition, builderCallback);
+		return new CommonBuilder<
+			ModelType,
+			FieldType,
+			DependentFieldType,
+			DependsOnCalled
+		>(this.sharedState).when(condition, builderCallback);
 	}
 }

@@ -1,10 +1,11 @@
 import {
 	ValidationOutcome,
 	ValidationResult,
-	ValidationRule, ValidatorArgs,
+	ValidationRule,
+	ValidatorArgs,
 } from "../../types/validation.types";
 import { createValidationOutcome } from "../utils/validation.util";
-import {isNonEmptyObject} from "../utils/misc.util";
+import { isNonEmptyObject } from "../utils/misc.util";
 
 export class Validation<ModelType> {
 	constructor(
@@ -64,17 +65,20 @@ export class Validation<ModelType> {
 			dependentValue,
 		};
 
-		for (const {validator, condition} of rule.validators) {
+		for (const { validator, condition } of rule.validators) {
 			if (condition && !condition(state)) continue;
 
-			const isResultValid = validator(validatorArgs as ValidatorArgs<ModelType, unknown, unknown, false>);
+			const isResultValid = validator(
+				validatorArgs as ValidatorArgs<ModelType, unknown, unknown, false>,
+			);
 
 			if (isResultValid) continue;
 
 			isValid = false;
-			const message = typeof rule.errorMessage === 'function'
-				? rule.errorMessage(state)
-				: rule.errorMessage;
+			const message =
+				typeof rule.errorMessage === "function"
+					? rule.errorMessage(state)
+					: rule.errorMessage;
 
 			result[rule.name] = {
 				propertyName: rule.propertyName,
@@ -86,6 +90,6 @@ export class Validation<ModelType> {
 			}
 		}
 
-		return createValidationOutcome({result, isValid});
+		return createValidationOutcome({ result, isValid });
 	}
 }
