@@ -31,8 +31,12 @@ jobs:
         run: npm ci
       - name: Test
         run: npm test
+      - name: Lint
+        run: npm run lint
       - name: Build
         run: npm run build
+      - name: Create package.json for dist
+        run: jq '.name = .name + "-dist"' package.json > dist/package.json
       - name: Archive build artifacts
         uses: actions/upload-artifact@v2
         with:
@@ -69,8 +73,6 @@ jobs:
         with:
           name: dist
           path: dist
-      - name: Create package.json for dist
-        run: jq '.name = .name + "-dist"' package.json > dist/package.json
       - name: Use Node.js
         uses: actions/setup-node@v2
         with:

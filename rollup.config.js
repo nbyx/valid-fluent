@@ -2,7 +2,7 @@ import typescript from '@rollup/plugin-typescript';
 import resolve from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
 import terser from "@rollup/plugin-terser";
-
+import del from 'rollup-plugin-delete';
 export default {
     input: 'src/index.ts', // Entry file
     output: [
@@ -20,5 +20,6 @@ export default {
         resolve(),
         commonjs(),
         terser(),
+        del({ targets: 'dist/*.test.d.ts'}),
     ]
 };
