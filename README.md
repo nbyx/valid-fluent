@@ -23,7 +23,7 @@ import { ValidationBuilder } from 'valid-fluent';
 
 const validation = ValidationBuilder.create<User>()
   .forField('username', u => u.username)
-  .addRule((u, field) => field !== '')
+  .addRule(({value}) => value !== '')
   .withMessage('Username is required')
   .build();
 
@@ -59,10 +59,10 @@ builder.addRule(emailValidator)
 You can also add a condition to multiple validation rules by using the builder callback provided by when:
 ```typescript
 builder.when(model => model.subscribeToNewsletter, builder =>
-  builder.forField(email, u => u.email)
+  builder.forField('email', u => u.email)
     .addRule(emailValidator)
     .withMessage('Invalid email!')
-    .forField(age, u => u.age)
+    .forField('age', u => u.age)
     .addRule(ageValidator)
     .withMesasge('You are not old enough'));
 ```
