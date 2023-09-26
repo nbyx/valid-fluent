@@ -35,8 +35,10 @@ jobs:
         run: npm run lint
       - name: Build
         run: npm run build
-      - name: Create package.json for dist
-        run: jq '.name = .name + "-dist"' package.json > dist/package.json
+      - name: Copy package.json to dist
+        run: cp package.json dist/package.json
+      - name: Copy README to dist
+        run: cp README.md dist/README.md
       - name: Patch package.json in dist
         run: |
           cd dist
@@ -48,15 +50,6 @@ jobs:
         with:
           name: dist
           path: dist/
-
-  pre-approval:
-    runs-on: ubuntu-latest
-    if: github.event_name == 'release'
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-      - name: Get and log current version number
-        run: echo "Current version is $(jq -r '.version' package.json)"
 
   request-approval:
     needs: [test-and-build, pre-approval]
