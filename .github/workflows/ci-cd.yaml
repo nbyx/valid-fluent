@@ -52,7 +52,7 @@ jobs:
           path: dist/
 
   request-approval:
-    needs: [test-and-build, pre-approval]
+    needs: [test-and-build]
     if: github.event_name == 'release'
     runs-on: ubuntu-latest
     environment:
