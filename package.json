@@ -1,6 +1,6 @@
 {
   "name": "valid-fluent",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "type": "module",
   "description": "A strongly-typed, chainable validation library for TypeScript. Craft intricate validation rules with Fluent API goodness. Go beyond boilerplate and embrace customizability.",
   "main": "dist/bundle.cjs.js",
