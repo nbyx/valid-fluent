@@ -67,7 +67,7 @@ export class ForFieldAddedBuilder<
 			...currentRule,
 			validators: newValidators,
 			propertyName: this.sharedState.currentAlias || currentRule.propertyName,
-			isAsync: isAsyncValidator,
+			isAsync: isAsyncValidator || currentRule.isAsync,
 		};
 
 		const newValidationRules: ValidationRule<
