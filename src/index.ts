@@ -1,5 +1,5 @@
 export { ValidationBuilder } from "./builder/validation-builder";
-export type { Validation } from "./builder/validation/validation";
+export type { SyncValidation } from "./builder/validation/sync-validation/sync-validation";
 
 export type {
 	ValidatorArgs,

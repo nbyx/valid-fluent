@@ -1,3 +1,6 @@
+import {SyncValidation} from "../builder/validation/sync-validation/sync-validation";
+import {AsyncValidation} from "../builder/validation/async-validation/async-validation";
+
 export type ValidationMessage = string;
 export type ValidatorArgs<
 	ModelType,
@@ -22,7 +25,7 @@ export type Validator<
 		DependentFieldType,
 		DependsOnCalled
 	>,
-) => boolean;
+) => boolean | Promise<boolean>;
 
 export type ValidationResult<Shape> = {
 	[key in keyof Shape]: { propertyName: string; message: ValidationMessage };
@@ -68,6 +71,7 @@ export type ValidationRule<
 	FieldValue,
 	DependentValueType,
 	DependsOnCalled = false,
+	IsAsync extends boolean = false,
 > = {
 	name: keyof ModelType;
 	propGetter: NestedPropGetter<ModelType, FieldValue>;
@@ -81,6 +85,7 @@ export type ValidationRule<
 	propertyCondition?: (model: ModelType) => boolean;
 	errorMessage: string | ((model: ModelType) => string);
 	propertyName: string;
+	isAsync: IsAsync;
 };
 
 export interface SharedBuilderState<
@@ -88,11 +93,22 @@ export interface SharedBuilderState<
 	FieldType,
 	DependentFieldType,
 	DependsOnCalled,
+	IsAsync extends boolean,
 > {
 	failFast: boolean;
 	validationRules: ReadonlyArray<
-		ValidationRule<ModelType, FieldType, DependentFieldType, DependsOnCalled>
+		ValidationRule<ModelType, FieldType, DependentFieldType, DependsOnCalled, IsAsync>
 	>;
 	currentAlias: string | null;
 	currentFieldStartIndex: number;
 }
+
+export type ValidationType<ModelType, IsAsync extends boolean> = IsAsync extends true
+	? AsyncValidation<ModelType>
+	: SyncValidation<ModelType>;
+
+// rome-ignore lint: any needed for function typing
+export type IsAsyncFunction<T> = T extends (...args: any[]) => Promise<any> ? true : false;
+
+
+

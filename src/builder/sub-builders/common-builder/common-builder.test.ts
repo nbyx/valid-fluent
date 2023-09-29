@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 import { CommonBuilder } from "./common-builder";
-import { Validation } from "../../validation/validation";
+import { SyncValidation } from "../../validation/sync-validation/sync-validation";
 import { ForFieldAddedBuilder } from "../for-field-added-builder/for-field-added-builder";
 
 interface UserModel {
@@ -36,9 +36,9 @@ describe("CommonBuilder", () => {
 			.withMessage("test error")
 			.when((model) => model.username !== "admin");
 		const validation = builder.build();
-		const outcome = validation.validate({ username: "admin", age: 30 });
+		const result = validation.validate({ username: "admin", age: 30 });
 
-		expect(outcome.isValid).toBe(true); // Assuming that the condition prevents the validation
+		expect(result.isValid).toBe(true);
 	});
 
 	test("when sets condition with builderCallback", () => {
@@ -53,16 +53,16 @@ describe("CommonBuilder", () => {
 						.withMessage("test error message"),
 			);
 		const validation = builder.build();
-		const outcome = validation.validate({ username: "admin", age: 30 });
+		const result = validation.validate({ username: "admin", age: 30 });
 
-		expect(outcome.isValid).toBe(true); // Assuming that the condition prevents the validation
+		expect(result.isValid).toBe(true);
 	});
 
 	test("build returns Validation instance", () => {
 		const builder = new CommonBuilder<UserModel, string, never>(sharedState);
 		const result = builder.build();
 
-		expect(result).toBeInstanceOf(Validation);
+		expect(result).toBeInstanceOf(SyncValidation);
 	});
 
 	test("build returns Validation instance with correct rules", () => {
@@ -71,11 +71,13 @@ describe("CommonBuilder", () => {
 			.addRule(({ value }) => value.length > 0)
 			.withMessage("Your error message here");
 		const validation = builder.build();
-		const outcome = validation.validate({ username: "", age: 30 });
+		const result = validation.validate({ username: "", age: 30 });
 
-		expect(outcome.isValid).toBe(false);
-		if (!outcome.isValid)
-			expect(outcome.result.username.message).toBe("Your error message here");
+		expect(result.isValid).toBe(false);
+		if (!result.isValid) {
+			expect(result.result.username.message).toBe("Your error message here");
+		}
+
 	});
 
 	test("No forField before when", () => {
@@ -101,7 +103,7 @@ describe("CommonBuilder", () => {
 			);
 		const validation = builder.build();
 		const model = { field1: "test", field2: 10, field3: true };
-		const outcome = validation.validate(model);
-		expect(outcome.isValid).toBe(true);
+		const result = validation.validate(model);
+		expect(result.isValid).toBe(true);
 	});
 });

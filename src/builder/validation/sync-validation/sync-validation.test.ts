@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
-import { Validation } from "./validation";
-import { ValidationRule } from "../../types/validation.types"; // Adjust the import to your project structure
+import { SyncValidation } from "./sync-validation";
+import { ValidationRule } from "../../../types/validation.types";
 
 interface UserModel {
 	username: string;
@@ -8,7 +8,7 @@ interface UserModel {
 	email?: string;
 }
 
-const usernameRule: ValidationRule<UserModel, string, never, false> = {
+const usernameRule: ValidationRule<UserModel, string, never> = {
 	name: "username",
 	propertyName: "username",
 	propGetter: (model) => model.username,
@@ -18,9 +18,10 @@ const usernameRule: ValidationRule<UserModel, string, never, false> = {
 		},
 	],
 	errorMessage: "Username cannot be empty",
+	isAsync: false,
 };
 
-const ageRule: ValidationRule<UserModel, number, never, false> = {
+const ageRule: ValidationRule<UserModel, number, never> = {
 	name: "age",
 	propertyName: "age",
 	propGetter: (model) => model.age,
@@ -30,12 +31,13 @@ const ageRule: ValidationRule<UserModel, number, never, false> = {
 		},
 	],
 	errorMessage: "Must be 18 or older",
+	isAsync: false,
 };
 
-const mockRules: ValidationRule<UserModel, unknown, unknown, false>[] = [
+const mockRules: ValidationRule<UserModel, unknown, unknown>[] = [
 	usernameRule,
 	ageRule,
-] as unknown as ValidationRule<UserModel, unknown, unknown, false>[];
+] as unknown as ValidationRule<UserModel, unknown, unknown>[];
 
 interface AdvancedUserModel extends UserModel {
 	password: string;
@@ -43,7 +45,7 @@ interface AdvancedUserModel extends UserModel {
 }
 
 // New Rule with dependent fields
-const passwordRule: ValidationRule<AdvancedUserModel, string, string, false> = {
+const passwordRule: ValidationRule<AdvancedUserModel, string, string> = {
 	name: "password",
 	propertyName: "password",
 	propGetter: (model) => model.password,
@@ -54,61 +56,66 @@ const passwordRule: ValidationRule<AdvancedUserModel, string, string, false> = {
 		},
 	],
 	errorMessage: "Passwords must match",
+	isAsync: false,
 };
 
 describe("Validation class", () => {
 	test("constructor initializes correctly", () => {
-		const validation = new Validation(true, mockRules);
+		const validation = new SyncValidation(true, mockRules);
 		expect(validation).toBeTruthy();
 	});
 
 	test("validate returns allValid true when all rules are valid", () => {
-		const validation = new Validation(false, mockRules);
+		const validation = new SyncValidation(false, mockRules);
 		const model: UserModel = {
 			username: "JohnDoe",
 			age: 30,
 		};
-		const outcome = validation.validate(model);
-		expect(outcome.isValid).toBe(true);
-		expect(outcome.result).toEqual({});
+		const result = validation.validate(model);
+
+		expect(result.isValid).toBe(true);
+		expect(result.result).toEqual({});
 	});
 
 	test("validate returns allValid false when some rules are invalid", () => {
-		const validation = new Validation(false, mockRules);
+		const validation = new SyncValidation(false, mockRules);
 		const model: UserModel = {
 			username: "",
 			age: 30,
 		};
-		const outcome = validation.validate(model);
-		expect(outcome.isValid).toBe(false);
-		expect(outcome.result).toHaveProperty("username");
+		const result = validation.validate(model);
+
+		expect(result.isValid).toBe(false);
+		expect(result.result).toHaveProperty("username");
 	});
 
 	test("validate respects failFast", () => {
-		const validation = new Validation(true, mockRules);
+		const validation = new SyncValidation(true, mockRules);
 		const model: UserModel = {
 			username: "",
 			age: 15,
 		};
-		const outcome = validation.validate(model);
-		expect(outcome.isValid).toBe(false);
-		expect(outcome.result).toHaveProperty("username");
-		expect(outcome.result).not.toHaveProperty("age");
+		const result = validation.validate(model);
+
+		expect(result.isValid).toBe(false);
+		expect(result.result).toHaveProperty("username");
+		expect(result.result).not.toHaveProperty("age");
 	});
 
 	test("validate handles empty rules array", () => {
-		const validation = new Validation(false, []);
+		const validation = new SyncValidation(false, []);
 		const model: UserModel = {
 			username: "JohnDoe",
 			age: 30,
 		};
-		const outcome = validation.validate(model);
-		expect(outcome.isValid).toBe(true);
-		expect(outcome.result).toEqual({});
+		const result = validation.validate(model);
+
+		expect(result.isValid).toBe(true);
+		expect(result.result).toEqual({});
 	});
 
 	test("validate skips rule when propertyCondition is false", () => {
-		const validation = new Validation(false, [
+		const validation = new SyncValidation(false, [
 			{
 				...ageRule,
 				propertyCondition: (model) => model.age > 100,
@@ -118,9 +125,10 @@ describe("Validation class", () => {
 			username: "JohnDoe",
 			age: 30,
 		};
-		const outcome = validation.validate(model);
-		expect(outcome.isValid).toBe(true);
-		expect(outcome.result).not.toHaveProperty("age");
+		const result = validation.validate(model);
+
+		expect(result.isValid).toBe(true);
+		expect(result.result).not.toHaveProperty("age");
 	});
 
 	test("validate skips validator when condition is false", () => {
@@ -133,7 +141,7 @@ describe("Validation class", () => {
 				},
 			],
 		};
-		const validation = new Validation(false, [
+		const validation = new SyncValidation(false, [
 			usernameRule,
 			modifiedAgeRule,
 		] as ValidationRule<UserModel, unknown, unknown, false>[]);
@@ -141,21 +149,23 @@ describe("Validation class", () => {
 			username: "JohnDoe",
 			age: 30,
 		};
-		const outcome = validation.validate(model);
-		expect(outcome.isValid).toBe(true);
-		expect(outcome.result).not.toHaveProperty("age");
+		const result = validation.validate(model);
+
+		expect(result.isValid).toBe(true);
+		expect(result.result).not.toHaveProperty("age");
 	});
 
 	test("validate returns allValid false when all rules are invalid", () => {
-		const validation = new Validation(false, mockRules);
+		const validation = new SyncValidation(false, mockRules);
 		const model: UserModel = {
 			username: "",
 			age: 15,
 		};
-		const outcome = validation.validate(model);
-		expect(outcome.isValid).toBe(false);
-		expect(outcome.result).toHaveProperty("username");
-		expect(outcome.result).toHaveProperty("age");
+		const result = validation.validate(model);
+
+		expect(result.isValid).toBe(false);
+		expect(result.result).toHaveProperty("username");
+		expect(result.result).toHaveProperty("age");
 	});
 
 	test("validate handles mixed conditions", () => {
@@ -168,7 +178,7 @@ describe("Validation class", () => {
 				},
 			],
 		};
-		const validation = new Validation(false, [
+		const validation = new SyncValidation(false, [
 			usernameRule,
 			modifiedAgeRule,
 		] as ValidationRule<UserModel, unknown, unknown, false>[]);
@@ -176,14 +186,15 @@ describe("Validation class", () => {
 			username: "",
 			age: 30,
 		};
-		const outcome = validation.validate(model);
-		expect(outcome.isValid).toBe(false);
-		expect(outcome.result).toHaveProperty("username");
-		expect(outcome.result).not.toHaveProperty("age");
+		const result = validation.validate(model);
+
+		expect(result.isValid).toBe(false);
+		expect(result.result).toHaveProperty("username");
+		expect(result.result).not.toHaveProperty("age");
 	});
 
 	test("validate handles dependent fields correctly", () => {
-		const validation = new Validation(false, [passwordRule] as ValidationRule<
+		const validation = new SyncValidation(false, [passwordRule] as ValidationRule<
 			UserModel,
 			unknown,
 			unknown,
@@ -195,8 +206,9 @@ describe("Validation class", () => {
 			password: "123",
 			confirmPassword: "123",
 		};
-		const outcome = validation.validate(model);
-		expect(outcome.isValid).toBe(true);
+		const result = validation.validate(model);
+
+		expect(result.isValid).toBe(true);
 	});
 
 	test("validate handles multiple validators for a single rule", () => {
@@ -213,16 +225,17 @@ describe("Validation class", () => {
 				],
 				errorMessage: "Username must be at least 3 characters",
 			};
-		const validation = new Validation(false, [
+		const validation = new SyncValidation(false, [
 			multiValidatorRule,
 		] as unknown as ValidationRule<UserModel, unknown, unknown, false>[]);
 		const model: UserModel = {
 			username: "Jo",
 			age: 30,
 		};
-		const outcome = validation.validate(model);
-		expect(outcome.isValid).toBe(false);
-		expect(outcome.result).toHaveProperty("username");
+		const result = validation.validate(model);
+
+		expect(result.isValid).toBe(false);
+		expect(result.result).toHaveProperty("username");
 	});
 
 	test("validate handles dynamic error messages", () => {
@@ -231,23 +244,24 @@ describe("Validation class", () => {
 				...ageRule,
 				errorMessage: (model) => `Must be 18 or older, you are ${model.age}`,
 			};
-		const validation = new Validation(false, [
+		const validation = new SyncValidation(false, [
 			dynamicMessageRule,
 		] as unknown as ValidationRule<UserModel, unknown, unknown, false>[]);
 		const model: UserModel = {
 			username: "JohnDoe",
 			age: 17,
 		};
-		const outcome = validation.validate(model);
-		expect(outcome.isValid).toBe(false);
-		if (!outcome.isValid)
-			expect(outcome.result.age.message).toBe(
-				"Must be 18 or older, you are 17",
-			);
+		const result = validation.validate(model);
+
+		expect(result.isValid).toBe(false);
+		if (!result.isValid)
+		expect(result.result.age.message).toBe(
+			"Must be 18 or older, you are 17",
+		);
 	});
 
 	test("validate does not mutate the input model", () => {
-		const validation = new Validation(false, [
+		const validation = new SyncValidation(false, [
 			usernameRule,
 			ageRule,
 		] as unknown as ValidationRule<UserModel, unknown, unknown, false>[]);

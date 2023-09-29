@@ -8,14 +8,16 @@ export class RuleAddedBuilder<
 	ModelType,
 	FieldType,
 	DependentFieldType,
-	DependsOnCalled = false,
+	DependsOnCalled extends boolean = false,
+	IsAsync extends boolean = false,
 > {
 	constructor(
 		private readonly sharedState: SharedBuilderState<
 			ModelType,
 			FieldType,
 			DependentFieldType,
-			DependsOnCalled
+			DependsOnCalled,
+			IsAsync
 		>,
 	) {}
 
@@ -25,39 +27,39 @@ export class RuleAddedBuilder<
 	 */
 	withMessage(
 		errorMessage: string | ((model: ModelType) => string),
-	): CommonBuilder<ModelType, FieldType, DependentFieldType, DependsOnCalled> {
+	): CommonBuilder<ModelType, FieldType, DependentFieldType, DependsOnCalled, IsAsync> {
 		const lastRuleIndex = this.sharedState.validationRules.length - 1;
-		if (lastRuleIndex >= 0) {
-			const lastRule = {
-				...this.sharedState.validationRules[lastRuleIndex],
-				errorMessage,
-			} as ValidationRule<
-				ModelType,
-				FieldType,
-				DependentFieldType,
-				DependsOnCalled
-			>;
-			const newValidationRules = [
-				...this.sharedState.validationRules.slice(0, lastRuleIndex),
-				lastRule,
-			];
+		if (lastRuleIndex === -1) throw new Error('no rule was provided before calling withMessage');
 
-			return new CommonBuilder<
-				ModelType,
-				FieldType,
-				DependentFieldType,
-				DependsOnCalled
-			>({
-				...this.sharedState,
-				validationRules: newValidationRules,
-			});
-		}
+		const lastRule = {
+			...this.sharedState.validationRules[lastRuleIndex],
+			errorMessage,
+		} as ValidationRule<
+			ModelType,
+			FieldType,
+			DependentFieldType,
+			DependsOnCalled,
+			IsAsync
+		>;
+		const newValidationRules = [
+			...this.sharedState.validationRules.slice(0, lastRuleIndex),
+			lastRule,
+		] as ValidationRule<ModelType,
+			FieldType,
+			DependentFieldType,
+			DependsOnCalled,
+			IsAsync>[];
 
 		return new CommonBuilder<
 			ModelType,
 			FieldType,
 			DependentFieldType,
-			DependsOnCalled
-		>(this.sharedState);
+			DependsOnCalled,
+			IsAsync
+		>({
+			...this.sharedState,
+			validationRules: newValidationRules,
+		});
+
 	}
 }

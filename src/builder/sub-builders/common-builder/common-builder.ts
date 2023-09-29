@@ -1,32 +1,36 @@
 import {
+	IsAsyncFunction,
 	NestedPropGetter,
 	SharedBuilderState,
-	ValidationRule,
+	ValidationRule, ValidationType, Validator,
 } from "../../../types/validation.types";
 import { ValidationBuilder } from "../../validation-builder";
 import { ForFieldAddedBuilder } from "../for-field-added-builder/for-field-added-builder";
 import { InitialBuilder } from "../initial-builder/initial-builder";
-import { Validation } from "../../validation/validation";
+import {createValidationInstance} from "../../utils/validation-instance.util";
+import {RuleAddedBuilder} from "../rule-added-builder/rule-added-builder";
 
 export class CommonBuilder<
 	ModelType,
 	FieldType,
 	DependentFieldType,
-	DependsOnCalled = false,
+	DependsOnCalled extends boolean = false,
+	IsAsync extends boolean = false,
 > {
 	constructor(
 		private readonly sharedState: SharedBuilderState<
 			ModelType,
 			FieldType,
 			DependentFieldType,
-			DependsOnCalled
+			DependsOnCalled,
+			IsAsync
 		>,
 	) {}
 
 	forField<NewFieldType>(
 		name: Extract<keyof ModelType, string>,
 		propGetter: NestedPropGetter<ModelType, NewFieldType>,
-	): ForFieldAddedBuilder<ModelType, NewFieldType, DependentFieldType> {
+	): ForFieldAddedBuilder<ModelType, NewFieldType, DependentFieldType, DependsOnCalled, IsAsync> {
 		return new InitialBuilder(this.sharedState).forField(name, propGetter);
 	}
 
@@ -40,8 +44,8 @@ export class CommonBuilder<
 		condition: (model: ModelType) => boolean,
 		builderCallback?: (
 			builder: InitialBuilder<ModelType>,
-		) => CommonBuilder<ModelType, Field, DependentField>,
-	): CommonBuilder<ModelType, FieldType, DependentFieldType, DependsOnCalled> {
+		) => CommonBuilder<ModelType, Field, DependentField, DependsOnCalled, IsAsync>,
+	): CommonBuilder<ModelType, FieldType, DependentFieldType, DependsOnCalled, IsAsync> {
 		if (builderCallback) {
 			return this.handleBuilderCallback(builderCallback, condition);
 		}
@@ -72,21 +76,16 @@ export class CommonBuilder<
 	 * Builds and returns a Validation instance to validate the model
 	 * @returns A new Validation instance
 	 */
-	build(): Validation<ModelType> {
-		return new Validation(this.sharedState.failFast, [
-			...(this.sharedState.validationRules as ValidationRule<
-				ModelType,
-				unknown,
-				unknown,
-				false
-			>[]),
-		]);
+	build(): ValidationType<ModelType, IsAsync> {
+		const hasAsyncRule = this.sharedState.validationRules.some(rule => rule.isAsync);
+
+		return createValidationInstance<ModelType, IsAsync>(hasAsyncRule, this.sharedState.failFast, [...this.sharedState.validationRules] as ValidationRule<ModelType, unknown, unknown>[])
 	}
 
 	private handleBuilderCallback<Field, DependentField>(
 		builderCallback: (
-			builder: InitialBuilder<ModelType, unknown, unknown>,
-		) => CommonBuilder<ModelType, Field, DependentField>,
+			builder: InitialBuilder<ModelType>,
+		) => CommonBuilder<ModelType, Field, DependentField, DependsOnCalled, IsAsync>,
 		condition: (model: ModelType) => boolean,
 	) {
 		const subBuilder = builderCallback(ValidationBuilder.create<ModelType>());
@@ -110,14 +109,34 @@ export class CommonBuilder<
 			ModelType,
 			FieldType,
 			DependentFieldType,
-			DependsOnCalled
+			DependsOnCalled,
+			IsAsync
 		>[];
 
 		return new CommonBuilder<
 			ModelType,
 			FieldType,
 			DependentFieldType,
-			DependsOnCalled
+			DependsOnCalled,
+			IsAsync
 		>({ ...this.sharedState, validationRules: newValidationRules });
+	}
+
+
+	addRule<V extends Validator<ModelType, FieldType, DependentFieldType, DependsOnCalled>>(
+		validator: V,
+		condition?: (model: ModelType) => boolean,
+	): RuleAddedBuilder<
+		ModelType,
+		FieldType,
+		DependentFieldType,
+		DependsOnCalled,
+		IsAsyncFunction<V> extends true ? true : IsAsync
+	> {
+		const fieldAddedBuilder = new ForFieldAddedBuilder<ModelType, FieldType,DependentFieldType,DependsOnCalled, IsAsync>(
+			{...this.sharedState as SharedBuilderState<ModelType, FieldType, DependentFieldType, DependsOnCalled, IsAsync> }
+		);
+
+		return fieldAddedBuilder.addRule(validator, condition);
 	}
 }
