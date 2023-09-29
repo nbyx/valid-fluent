@@ -7,20 +7,22 @@ interface DummyModel {
 	field2: number;
 }
 
-const dummyRule1: ValidationRule<DummyModel, string, never, false> = {
+const dummyRule1: ValidationRule<DummyModel, string, never> = {
 	name: "field1",
 	propertyName: "field1",
 	propGetter: (model) => model.field1,
 	validators: [{ validator: ({ value }) => value !== "" }],
 	errorMessage: "Initial error message 1",
+	isAsync: false,
 };
 
-const dummyRule2: ValidationRule<DummyModel, number, never, false> = {
+const dummyRule2: ValidationRule<DummyModel, number, never> = {
 	name: "field2",
 	propertyName: "field2",
 	propGetter: (model) => model.field2,
 	validators: [{ validator: ({ value }) => value > 0 }],
 	errorMessage: "Initial error message 2",
+	isAsync: false,
 };
 
 const sharedState = {
@@ -37,8 +39,7 @@ describe("RuleAddedBuilder class", () => {
 			validationRules: [dummyRule1, dummyRule2] as ValidationRule<
 				DummyModel,
 				string | number,
-				never,
-				false
+				never
 			>[],
 		});
 		const updatedBuilder = builder.withMessage("Updated error message");
@@ -52,10 +53,9 @@ describe("RuleAddedBuilder class", () => {
 		const builder = new RuleAddedBuilder<DummyModel, string | number, never>(
 			sharedState,
 		);
-		const updatedBuilder = builder.withMessage("Updated error message");
-		// rome-ignore lint: only for test
-		const updatedRules = (updatedBuilder as any).sharedState.validationRules;
 
-		expect(updatedRules).toEqual([]);
+		expect(() => builder.withMessage("Updated error message")).toThrow(
+			"no rule was provided before calling withMessage"
+		);
 	});
 });

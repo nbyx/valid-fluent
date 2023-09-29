@@ -9,6 +9,7 @@ Tired of unreadable and messy model validation logic? Meet valid-fluent Builder!
 - Full TypeScript support for strong type safety
 - Flexible and extensible
 - Supports conditional validation
+- Supports synchronous and asynchronous validation
 - Optional "fail fast" mode to stop validation on first error
 
 ## Installation 📦
@@ -29,6 +30,22 @@ const validation = ValidationBuilder.create<User>()
 
 const result = validation.validate(user);
 ```
+
+## Async Validation
+Asynchronous validators can be added just like regular validators. They should return a Promise.
+```typescript
+const asyncValidation = ValidationBuilder.create<User>()
+  .forField('username', u => u.username)
+  .addRule(async ({value}) => {
+    const userExists = await checkUserExists(value);
+    return !userExists;
+  })
+  .withMessage('Username already exists')
+  .build();
+
+const asyncResult = await asyncValidation.validateAsync(user);
+```
+
 ## Core Concepts
 The entry point for creating validations. Start by calling 
 ```typescript
@@ -100,8 +117,8 @@ builder.forField('email', model => model.email).addRule(args => {
 You can use the **ValidatorArgs**-type to type your validator.
 
 ## Upcoming Features
+- [x] Async Validators
 - [ ] Validation Result Transformation
-- [ ] Async Validators
 - [ ] Custom Validation Error Handling
 - [ ] Validation Groups
 - [ ] Integration with Popular Libraries/Frameworks

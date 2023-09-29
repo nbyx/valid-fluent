@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, test } from "vitest";
 import { ForFieldAddedBuilder } from "./for-field-added-builder";
 import { InitialBuilder } from "../initial-builder/initial-builder";
-import { SharedBuilderState } from "../../../types/validation.types"; // Adjust the import to your project structure
+import { SharedBuilderState } from "../../../types/validation.types";
 
 interface TestModel {
 	field1: string;
@@ -10,7 +10,7 @@ interface TestModel {
 }
 
 describe("ForFieldAddedBuilder class", () => {
-	let sharedState: SharedBuilderState<TestModel, unknown, unknown, false>;
+	let sharedState: SharedBuilderState<TestModel, unknown, unknown, false, false>;
 
 	beforeEach(() => {
 		sharedState = {
@@ -43,9 +43,9 @@ describe("ForFieldAddedBuilder class", () => {
 
 		const validation = builder.build();
 		const model = { field1: "test", field2: 10, field3: true };
-		const outcome = validation.validate(model);
+		const result = validation.validate(model);
 
-		expect(outcome.isValid).toBe(true);
+		expect(result.isValid).toBe(true);
 	});
 
 
@@ -70,11 +70,11 @@ describe("ForFieldAddedBuilder class", () => {
 
 		const validation = builder.build();
 		const model = { field1: "", field2: 10, field3: true };
-		const outcome = validation.validate(model);
-		expect(outcome.result).toHaveProperty("field1");
-		expect(outcome.isValid).toBe(false);
-		if (!outcome.isValid)
-			expect(outcome.result.field1.propertyName).toBe("alias");
+		const result = validation.validate(model);
+		expect(result.result).toHaveProperty("field1");
+		expect(result.isValid).toBe(false);
+		if (!result.isValid)
+			expect(result.result.field1.propertyName).toBe("alias");
 	});
 
 	test("dependsOn without prior forField call", () => {
@@ -97,8 +97,8 @@ describe("ForFieldAddedBuilder class", () => {
 
 		const validation = builder.build();
 		const model = { field1: "10", field2: 10, field3: true };
-		const outcome = validation.validate(model);
-		expect(outcome.isValid).toBe(false); // Assuming you want string and number to be different
+		const result = validation.validate(model);
+		expect(result.isValid).toBe(false);
 	});
 
 	test("when sets condition on last rule", () => {
@@ -110,8 +110,9 @@ describe("ForFieldAddedBuilder class", () => {
 		// Assuming you have a build() method to finalize the builder
 		const validation = builder.build();
 		const model = { field1: "test", field2: 10, field3: true };
-		const outcome = validation.validate(model);
-		expect(outcome.isValid).toBe(true);
+		const result = validation.validate(model);
+
+		expect(result.isValid).toBe(true);
 	});
 
 	test("when with builderCallback", () => {
@@ -129,7 +130,8 @@ describe("ForFieldAddedBuilder class", () => {
 		// Assuming you have a build() method to finalize the builder
 		const validation = builder.build();
 		const model = { field1: "test", field2: 10, field3: true };
-		const outcome = validation.validate(model);
-		expect(outcome.isValid).toBe(true);
+		const result = validation.validate(model);
+
+		expect(result.isValid).toBe(true);
 	});
 });

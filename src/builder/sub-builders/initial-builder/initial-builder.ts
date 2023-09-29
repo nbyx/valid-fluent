@@ -9,14 +9,16 @@ export class InitialBuilder<
 	ModelType,
 	FieldType = unknown,
 	DependentFieldType = unknown,
-	DependsOnCalled = false,
+	DependsOnCalled extends boolean = false,
+	IsAsync extends boolean = false,
 > {
 	constructor(
 		private readonly sharedState: SharedBuilderState<
 			ModelType,
 			FieldType,
 			DependentFieldType,
-			DependsOnCalled
+			DependsOnCalled,
+			IsAsync
 		>,
 	) {}
 	private readonly NO_ERROR_MESSAGE = "No error message set for this rule";
@@ -30,7 +32,7 @@ export class InitialBuilder<
 	forField<NewFieldType>(
 		name: Extract<keyof ModelType, string>,
 		propGetter: NestedPropGetter<ModelType, NewFieldType>,
-	): ForFieldAddedBuilder<ModelType, NewFieldType, DependentFieldType, false> {
+	): ForFieldAddedBuilder<ModelType, NewFieldType, DependentFieldType, DependsOnCalled, IsAsync> {
 		this.sharedState.currentFieldStartIndex =
 			this.sharedState.validationRules.length;
 
@@ -38,13 +40,15 @@ export class InitialBuilder<
 			ModelType,
 			NewFieldType,
 			DependentFieldType,
-			false
+			DependsOnCalled,
+			IsAsync
 		> = {
 			name,
 			propGetter,
 			validators: [],
 			errorMessage: this.NO_ERROR_MESSAGE,
 			propertyName: name,
+			isAsync: false as IsAsync,
 		};
 		const newValidationRules = [
 			...this.sharedState.validationRules,
@@ -53,14 +57,16 @@ export class InitialBuilder<
 			ModelType,
 			NewFieldType,
 			DependentFieldType,
-			false
+			DependsOnCalled,
+			IsAsync
 		>[];
 
 		return new ForFieldAddedBuilder<
 			ModelType,
 			NewFieldType,
 			DependentFieldType,
-			false
+			DependsOnCalled,
+			IsAsync
 		>({ ...this.sharedState, validationRules: newValidationRules });
 	}
 }

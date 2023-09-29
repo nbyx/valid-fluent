@@ -19,8 +19,9 @@ describe("e2e-library-test", () => {
 		const outcome = validation.validate(model);
 
 		expect(outcome.isValid).toBe(false);
-		if (!outcome.isValid)
+		if (!outcome.isValid) {
 			expect(outcome.result.username.message).toBe("Username cannot be empty");
+		}
 	});
 
 	test("should validate model with aliasAs", () => {
@@ -34,11 +35,14 @@ describe("e2e-library-test", () => {
 		const model = { username: "", password: "", active: true };
 		const outcome = validation.validate(model);
 
+
 		expect(outcome.isValid).toBe(false);
 		if (!outcome.isValid) {
 			expect(outcome.result.username.message).toBe("Username cannot be empty");
 			expect(outcome.result.username.propertyName).toBe("user");
 		}
+
+
 	});
 
 	test("should validate model with dependsOn", () => {
@@ -110,7 +114,6 @@ describe("e2e-library-test", () => {
 		const validation = builder.build();
 		const model = { username: "user", password: "pass", active: true };
 		const outcome = validation.validate(model);
-
 		expect(outcome.isValid).toBe(false);
 		if (!outcome.isValid)
 			expect(outcome.result.password.message).toBe(
@@ -140,6 +143,7 @@ describe("e2e-library-test", () => {
 
 		model = { username: "user", password: "123", active: true };
 		outcome = validation.validate(model);
+
 		expect(outcome.isValid).toBe(false);
 		if (!outcome.isValid)
 			expect(outcome.result.password.message).toBe(
@@ -158,10 +162,74 @@ describe("e2e-library-test", () => {
         const model = { username: 'user', password: 'pass', active: true };
         const outcome = validation.validate(model);
 
-        expect(outcome.isValid).toBe(false);
-        if (!outcome.isValid) {
-            expect(outcome.result.password.propertyName).toBe('password');
-            expect(outcome.result.password.message).toBe('Password must match username for some reason');
-        }
+		expect(outcome.isValid).toBe(false);
+		if (!outcome.isValid) {
+			expect(outcome.result.password.propertyName).toBe('password');
+			expect(outcome.result.password.message).toBe('Password must match username for some reason');
+		}
     });
+
+	test('should handle async validation rules correctly', async () => {
+		const builder = ValidationBuilder.create<UserModel>()
+			.forField('password', model => model.password)
+			.dependsOn(model => model.username)
+			.addRule(async ({ value, dependentValue }) => value === dependentValue)
+			.withMessage('Password must match username for some reason');
+
+		const validation = builder.build();
+		const model = { username: 'user', password: 'pass', active: true };
+		const outcome = await validation.validateAsync(model);
+
+		expect(outcome.isValid).toBe(false);
+		if (!outcome.isValid) {
+			expect(outcome.result.password.propertyName).toBe('password');
+			expect(outcome.result.password.message).toBe('Password must match username for some reason');
+		}
+	});
+
+	test('should handle mixed sync and async validation rules correctly', async () => {
+		const builder = ValidationBuilder.create<UserModel>()
+			.forField('password', model => model.password)
+			.dependsOn(model => model.username)
+			.addRule(({ value }) => value !== '')  // Sync rule
+			.withMessage('Password cannot be empty')
+			.addRule(async ({ value, dependentValue }) => value === dependentValue)  // Async rule
+			.withMessage('Password must match username for some reason');
+
+		const validation = builder.build();
+		const model = { username: 'user', password: 'user', active: true };  // Now password matches username
+		const outcome = await validation.validateAsync(model);
+
+		expect(outcome.isValid).toBe(true);
+	});
+
+	test('should remain async if an async rule is added, then a sync rule', async () => {
+		const builder = ValidationBuilder.create<UserModel>()
+			.forField('password', model => model.password)
+			.addRule(async ({ value }) => value.length > 0)
+			.withMessage('test error message')
+			.addRule(({ value }) => value !== 'password123')
+			.withMessage('test error message 2');  // sync rule
+
+		const validation = builder.build();
+		const model = { password: 'password123', username: '123', active: false };
+		const outcome = await validation.validateAsync(model);
+
+		expect(outcome.isValid).toBe(false);
+	});
+
+	test('should become async if a sync rule is added, then an async rule', async () => {
+		const builder = ValidationBuilder.create<UserModel>()
+			.forField('password', model => model.password)
+			.addRule(({ value }) => value !== 'password123')
+			.withMessage('test error message')// sync rule
+			.addRule(async ({ value }) => value.length > 0)
+			.withMessage('test error message 2');
+
+		const validation = builder.build();
+		const model = { password: 'password123', username: '123', active: false  };
+		const outcome = await validation.validateAsync(model);
+
+		expect(outcome.isValid).toBe(false);
+	});
 });
