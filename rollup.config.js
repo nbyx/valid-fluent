@@ -16,7 +16,7 @@ export default {
         }
     ],
     plugins: [
-        typescript(),
+        typescript({ exclude: ['**/*.test.ts']}),
         resolve(),
         commonjs(),
         terser(),

@@ -10,7 +10,7 @@
     "test": "vitest",
     "lint": "npx rome check ./src",
     "format": "npx rome format ./src --write",
-    "build": "rollup -c && node clean-dist.js"
+    "build": "rollup -c"
   },
   "keywords": [
     "validation",
