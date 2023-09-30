@@ -38,18 +38,22 @@ Valid-Fluent now incorporates handy methods for validating common data types. Ad
 ```typescript
 
 const validation = ValidationBuilder.create<User>()
+    
 .forField('age', u => u.age)
-.isNumber()
-.isGreaterThan(18)
-.withMessage('You must be over 18')
+    .isNumber()
+    .withMessage('Must be number')
+    .isGreaterThan(18)
+    .withMessage('You must be over 18')
 .forField('email', u => u.email)
-.isString()
-.matches(/@/)
-.withMessage('Email must contain "@"')
+    .isString()
+    .withMessage('Must be string')
+    .matches(/@/)
+    .withMessage('Email must contain "@"')
 .forField('isActive', u => u.isActive)
-.isBoolean()
-.isTrue()
-.withMessage('You must be active')
+    .isBoolean()
+    .withMessage('Must be boolean')
+    .isTrue()
+    .withMessage('You must be active')
 .build();
 ```
 
@@ -107,12 +111,13 @@ builder.addRule(emailValidator)
 You can also add a condition to multiple validation rules by using the builder callback provided by when:
 ```typescript
 builder.when(model => model.subscribeToNewsletter, builder =>
-  builder.forField('email', u => u.email)
-    .addRule(emailValidator)
-    .withMessage('Invalid email!')
-    .forField('age', u => u.age)
-    .addRule(ageValidator)
-    .withMesasge('You are not old enough'));
+  builder
+      .forField('email', u => u.email)
+        .addRule(emailValidator)
+        .withMessage('Invalid email!')
+      .forField('age', u => u.age)
+        .addRule(ageValidator)
+        .withMesasge('You are not old enough'));
 ```
 
 ## Dependent Field Validation
@@ -138,10 +143,12 @@ builder.addRule(emailValidator)
 You could also do this inline:
 
 ```typescript
-builder.forField('email', model => model.email).addRule(args => {
-  const { value } = args;
-
-  return value.includes('@')
+builder
+    .forField('email', model => model.email)
+    .addRule(args => {
+      const { value } = args;
+    
+      return value.includes('@')
 })
 ```
 
