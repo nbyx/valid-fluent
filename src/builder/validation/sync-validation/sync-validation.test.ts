@@ -194,12 +194,9 @@ describe("Validation class", () => {
 	});
 
 	test("validate handles dependent fields correctly", () => {
-		const validation = new SyncValidation(false, [passwordRule] as ValidationRule<
-			UserModel,
-			unknown,
-			unknown,
-			false
-		>[]);
+		const validation = new SyncValidation(false, [
+			passwordRule,
+		] as ValidationRule<UserModel, unknown, unknown, false>[]);
 		const model: AdvancedUserModel = {
 			username: "JohnDoe",
 			age: 30,
@@ -255,9 +252,7 @@ describe("Validation class", () => {
 
 		expect(result.isValid).toBe(false);
 		if (!result.isValid)
-		expect(result.result.age.message).toBe(
-			"Must be 18 or older, you are 17",
-		);
+			expect(result.result.age.message).toBe("Must be 18 or older, you are 17");
 	});
 
 	test("validate does not mutate the input model", () => {

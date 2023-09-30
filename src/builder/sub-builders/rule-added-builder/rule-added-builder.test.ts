@@ -30,6 +30,7 @@ const sharedState = {
 	currentFieldStartIndex: 0,
 	currentAlias: null,
 	failFast: true,
+	currentType: null,
 };
 
 describe("RuleAddedBuilder class", () => {
@@ -55,7 +56,7 @@ describe("RuleAddedBuilder class", () => {
 		);
 
 		expect(() => builder.withMessage("Updated error message")).toThrow(
-			"no rule was provided before calling withMessage"
+			"no rule was provided before calling withMessage",
 		);
 	});
 });

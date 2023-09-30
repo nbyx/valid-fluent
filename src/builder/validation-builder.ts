@@ -12,6 +12,7 @@ export class ValidationBuilder {
 			currentFieldStartIndex: 0,
 			currentAlias: null,
 			failFast,
+			currentType: null,
 		});
 	}
 }
