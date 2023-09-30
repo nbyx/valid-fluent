@@ -10,7 +10,7 @@ interface TestModel {
 }
 
 describe("ForFieldAddedBuilder class", () => {
-	let sharedState: SharedBuilderState<TestModel, unknown, unknown, false, false>;
+	let sharedState: SharedBuilderState<TestModel, unknown, unknown, false, false, null>;
 
 	beforeEach(() => {
 		sharedState = {
@@ -18,6 +18,7 @@ describe("ForFieldAddedBuilder class", () => {
 			currentFieldStartIndex: 0,
 			currentAlias: null,
 			failFast: true,
+			currentType: null,
 		};
 	});
 
@@ -28,6 +29,7 @@ describe("ForFieldAddedBuilder class", () => {
 				currentFieldStartIndex: 0,
 				currentAlias: null,
 				failFast: true,
+				currentType: null,
 			}).addRule(({ value }) => value !== "");
 		}).toThrow(Error);
 	});

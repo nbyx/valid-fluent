@@ -1,14 +1,12 @@
 import {
-	IsAsyncFunction,
 	NestedPropGetter,
-	SharedBuilderState,
+	SharedBuilderState, SharedStateFieldType,
 	ValidationRule, ValidationType, Validator,
 } from "../../../types/validation.types";
 import { ValidationBuilder } from "../../validation-builder";
 import { ForFieldAddedBuilder } from "../for-field-added-builder/for-field-added-builder";
 import { InitialBuilder } from "../initial-builder/initial-builder";
-import {createValidationInstance} from "../../utils/validation-instance.util";
-import {RuleAddedBuilder} from "../rule-added-builder/rule-added-builder";
+import { createValidationInstance } from "../../utils/validation-instance.util";
 
 export class CommonBuilder<
 	ModelType,
@@ -16,6 +14,7 @@ export class CommonBuilder<
 	DependentFieldType,
 	DependsOnCalled extends boolean = false,
 	IsAsync extends boolean = false,
+	CurrentType extends SharedStateFieldType | null = null
 > {
 	constructor(
 		private readonly sharedState: SharedBuilderState<
@@ -23,7 +22,8 @@ export class CommonBuilder<
 			FieldType,
 			DependentFieldType,
 			DependsOnCalled,
-			IsAsync
+			IsAsync,
+			CurrentType
 		>,
 	) {}
 
@@ -44,8 +44,8 @@ export class CommonBuilder<
 		condition: (model: ModelType) => boolean,
 		builderCallback?: (
 			builder: InitialBuilder<ModelType>,
-		) => CommonBuilder<ModelType, Field, DependentField, DependsOnCalled, IsAsync>,
-	): CommonBuilder<ModelType, FieldType, DependentFieldType, DependsOnCalled, IsAsync> {
+		) => CommonBuilder<ModelType, Field, DependentField, DependsOnCalled, IsAsync, CurrentType>,
+	): CommonBuilder<ModelType, FieldType, DependentFieldType, DependsOnCalled, IsAsync, CurrentType> {
 		if (builderCallback) {
 			return this.handleBuilderCallback(builderCallback, condition);
 		}
@@ -85,7 +85,7 @@ export class CommonBuilder<
 	private handleBuilderCallback<Field, DependentField>(
 		builderCallback: (
 			builder: InitialBuilder<ModelType>,
-		) => CommonBuilder<ModelType, Field, DependentField, DependsOnCalled, IsAsync>,
+		) => CommonBuilder<ModelType, Field, DependentField, DependsOnCalled, IsAsync, CurrentType>,
 		condition: (model: ModelType) => boolean,
 	) {
 		const subBuilder = builderCallback(ValidationBuilder.create<ModelType>());
@@ -118,7 +118,8 @@ export class CommonBuilder<
 			FieldType,
 			DependentFieldType,
 			DependsOnCalled,
-			IsAsync
+			IsAsync,
+			CurrentType
 		>({ ...this.sharedState, validationRules: newValidationRules });
 	}
 
@@ -126,15 +127,9 @@ export class CommonBuilder<
 	addRule<V extends Validator<ModelType, FieldType, DependentFieldType, DependsOnCalled>>(
 		validator: V,
 		condition?: (model: ModelType) => boolean,
-	): RuleAddedBuilder<
-		ModelType,
-		FieldType,
-		DependentFieldType,
-		DependsOnCalled,
-		IsAsyncFunction<V> extends true ? true : IsAsync
-	> {
-		const fieldAddedBuilder = new ForFieldAddedBuilder<ModelType, FieldType,DependentFieldType,DependsOnCalled, IsAsync>(
-			{...this.sharedState as SharedBuilderState<ModelType, FieldType, DependentFieldType, DependsOnCalled, IsAsync> }
+	){
+		const fieldAddedBuilder = new ForFieldAddedBuilder<ModelType, FieldType,DependentFieldType,DependsOnCalled, IsAsync, CurrentType>(
+			{...this.sharedState as SharedBuilderState<ModelType, FieldType, DependentFieldType, DependsOnCalled, IsAsync, CurrentType> }
 		);
 
 		return fieldAddedBuilder.addRule(validator, condition);

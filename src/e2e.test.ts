@@ -4,6 +4,8 @@ import { ValidationBuilder } from "./builder/validation-builder";
 type UserModel = {
 	username: string;
 	password: string;
+	age: number;
+	birthDate: Date;
 	active: boolean;
 };
 
@@ -15,7 +17,7 @@ describe("e2e-library-test", () => {
 			.withMessage("Username cannot be empty");
 
 		const validation = builder.build();
-		const model = { username: "", password: "", active: true };
+		const model = { username: "", password: "", active: true, birthDate: new Date(), age: 0 };
 		const outcome = validation.validate(model);
 
 		expect(outcome.isValid).toBe(false);
@@ -32,7 +34,7 @@ describe("e2e-library-test", () => {
 			.withMessage("Username cannot be empty");
 
 		const validation = builder.build();
-		const model = { username: "", password: "", active: true };
+		const model = { username: "", password: "", active: true, age: 0, birthDate: new Date() };
 		const outcome = validation.validate(model);
 
 
@@ -58,7 +60,7 @@ describe("e2e-library-test", () => {
 			.withMessage("Password must match username for some reason");
 
 		const validation = builder.build();
-		const model = { username: "user", password: "pass", active: true };
+		const model = { username: "user", password: "pass", active: true, age: 0, birthDate: new Date() };
 		const outcome = validation.validate(model);
 
 		expect(outcome.isValid).toBe(false);
@@ -76,7 +78,7 @@ describe("e2e-library-test", () => {
 			.when((model) => model.active);
 
 		const validation = builder.build();
-		const model = { username: "", active: false, password: "" };
+		const model = { username: "", active: false, password: "", age: 0, birthDate: new Date() };
 		const outcome = validation.validate(model);
 
 		expect(outcome.isValid).toBe(true);
@@ -92,7 +94,7 @@ describe("e2e-library-test", () => {
 			.withMessage("Password must be at least 8 characters");
 
 		const validation = builder.build();
-		const model = { username: "", password: "short", active: true };
+		const model = { username: "", password: "short", active: true, age: 0, birthDate: new Date() };
 		const outcome = validation.validate(model);
 
 		expect(outcome.isValid).toBe(false);
@@ -112,7 +114,7 @@ describe("e2e-library-test", () => {
 			.withMessage("Password must match username for some reason");
 
 		const validation = builder.build();
-		const model = { username: "user", password: "pass", active: true };
+		const model = { username: "user", password: "pass", active: true, age: 0, birthDate: new Date() };
 		const outcome = validation.validate(model);
 		expect(outcome.isValid).toBe(false);
 		if (!outcome.isValid)
@@ -137,11 +139,11 @@ describe("e2e-library-test", () => {
 
 		const validation = builder.build();
 
-		let model = { username: "admin", password: "123", active: true };
+		let model = { username: "admin", password: "123", active: true, age: 0, birthDate: new Date() };
 		let outcome = validation.validate(model);
 		expect(outcome.isValid).toBe(true);
 
-		model = { username: "user", password: "123", active: true };
+		model = { username: "user", password: "123", active: true, age: 0, birthDate: new Date() };
 		outcome = validation.validate(model);
 
 		expect(outcome.isValid).toBe(false);
@@ -159,7 +161,7 @@ describe("e2e-library-test", () => {
             .withMessage('Password must match username for some reason');
 
         const validation = builder.build();
-        const model = { username: 'user', password: 'pass', active: true };
+        const model = { username: 'user', password: 'pass', active: true, age: 0, birthDate: new Date() };
         const outcome = validation.validate(model);
 
 		expect(outcome.isValid).toBe(false);
@@ -177,7 +179,7 @@ describe("e2e-library-test", () => {
 			.withMessage('Password must match username for some reason');
 
 		const validation = builder.build();
-		const model = { username: 'user', password: 'pass', active: true };
+		const model = { username: 'user', password: 'pass', active: true, age: 0, birthDate: new Date() };
 		const outcome = await validation.validateAsync(model);
 
 		expect(outcome.isValid).toBe(false);
@@ -197,7 +199,7 @@ describe("e2e-library-test", () => {
 			.withMessage('Password must match username for some reason');
 
 		const validation = builder.build();
-		const model = { username: 'user', password: 'user', active: true };  // Now password matches username
+		const model = { username: 'user', password: 'user', active: true, age: 0, birthDate: new Date() };  // Now password matches username
 		const outcome = await validation.validateAsync(model);
 
 		expect(outcome.isValid).toBe(true);
@@ -212,7 +214,7 @@ describe("e2e-library-test", () => {
 			.withMessage('test error message 2');  // sync rule
 
 		const validation = builder.build();
-		const model = { password: 'password123', username: '123', active: false };
+		const model = { password: 'password123', username: '123', active: false, age: 0, birthDate: new Date() };
 		const outcome = await validation.validateAsync(model);
 
 		expect(outcome.isValid).toBe(false);
@@ -227,9 +229,85 @@ describe("e2e-library-test", () => {
 			.withMessage('test error message 2');
 
 		const validation = builder.build();
-		const model = { password: 'password123', username: '123', active: false  };
+		const model = { password: 'password123', username: '123', active: false, age: 0, birthDate: new Date()  };
 		const outcome = await validation.validateAsync(model);
 
 		expect(outcome.isValid).toBe(false);
+	});
+
+
+	test('should validate UserModel password field', () => {
+		const builder = ValidationBuilder.create<UserModel>()
+			.forField('password', model => model.password)
+			.isString()
+			.withMessage('Password must be a string')
+			.isUUID()
+			.withMessage('Password must be a UUID');
+
+		const validation = builder.build();
+		const model = { password: 'password123', username: '123', active: false, age: 0, birthDate: new Date() };
+		const outcome = validation.validate(model);
+		expect(outcome.isValid).toBe(false);
+		if (!outcome.isValid) {
+			expect(outcome.result).toHaveProperty('password');
+			expect(outcome.result.password.message).toContain('Password must be a UUID');
+		}
+	});
+
+	test('should validate UserModel active field', () => {
+		const builder = ValidationBuilder.create<UserModel>()
+			.forField('active', model => model.active)
+			.isBoolean()
+			.withMessage('Active must be a boolean');
+
+		const validation = builder.build();
+		const model = { password: 'password123', username: '123', active: 'false'as unknown as boolean, age: 0, birthDate: new Date() };
+		const outcome = validation.validate(model);
+
+		expect(outcome.isValid).toBe(false);
+		if (!outcome.isValid) {
+			expect(outcome.result).toHaveProperty('active');
+			expect(outcome.result.active.message).toContain('Active must be a boolean');
+		}
+	});
+
+	// Number Validation
+	test('should validate UserModel age field', () => {
+		const builder = ValidationBuilder.create<UserModel>()
+			.forField('age', model => model.age)
+			.isNumber()
+			.withMessage('Age must be a number')
+			.isPositive()
+			.withMessage('Age must be positive');
+
+		const validation = builder.build();
+		const model = { password: 'password123', username: '123', active: false, age: -5, birthDate: new Date() };
+		const outcome = validation.validate(model);
+
+		expect(outcome.isValid).toBe(false);
+		if (!outcome.isValid) {
+			expect(outcome.result).toHaveProperty('age');
+			expect(outcome.result.age.message).toContain('Age must be positive');
+		}
+	});
+
+	// Date Validation
+	test('should validate UserModel birthDate field', () => {
+		const builder = ValidationBuilder.create<UserModel>()
+			.forField('birthDate', model => model.birthDate)
+			.isDate()
+			.withMessage('BirthDate must be a date')
+			.isPast()
+			.withMessage('BirthDate must be in the past');
+
+		const validation = builder.build();
+		const model = { password: 'password123', username: '123', active: false, birthDate: new Date('2099-01-01'), age: 0 };
+		const outcome = validation.validate(model);
+
+		expect(outcome.isValid).toBe(false);
+		if (!outcome.isValid) {
+			expect(outcome.result).toHaveProperty('birthDate');
+			expect(outcome.result.birthDate.message).toContain('BirthDate must be in the past');
+		}
 	});
 });

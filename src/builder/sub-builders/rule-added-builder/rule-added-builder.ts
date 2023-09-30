@@ -1,8 +1,9 @@
 import {
-	SharedBuilderState,
+	SharedBuilderState, SharedStateFieldType,
 	ValidationRule,
 } from "../../../types/validation.types";
-import { CommonBuilder } from "../common-builder/common-builder";
+import { getBuilderInstance } from "../../utils/builder-instance.util";
+import type {BuilderType} from "../../../types/builder.type";
 
 export class RuleAddedBuilder<
 	ModelType,
@@ -10,6 +11,7 @@ export class RuleAddedBuilder<
 	DependentFieldType,
 	DependsOnCalled extends boolean = false,
 	IsAsync extends boolean = false,
+	CurrentType extends SharedStateFieldType | null = null
 > {
 	constructor(
 		private readonly sharedState: SharedBuilderState<
@@ -17,7 +19,8 @@ export class RuleAddedBuilder<
 			FieldType,
 			DependentFieldType,
 			DependsOnCalled,
-			IsAsync
+			IsAsync,
+			CurrentType
 		>,
 	) {}
 
@@ -27,7 +30,7 @@ export class RuleAddedBuilder<
 	 */
 	withMessage(
 		errorMessage: string | ((model: ModelType) => string),
-	): CommonBuilder<ModelType, FieldType, DependentFieldType, DependsOnCalled, IsAsync> {
+	): BuilderType<CurrentType, ModelType, FieldType, DependentFieldType, DependsOnCalled, IsAsync> {
 		const lastRuleIndex = this.sharedState.validationRules.length - 1;
 		if (lastRuleIndex === -1) throw new Error('no rule was provided before calling withMessage');
 
@@ -50,16 +53,8 @@ export class RuleAddedBuilder<
 			DependsOnCalled,
 			IsAsync>[];
 
-		return new CommonBuilder<
-			ModelType,
-			FieldType,
-			DependentFieldType,
-			DependsOnCalled,
-			IsAsync
-		>({
-			...this.sharedState,
-			validationRules: newValidationRules,
-		});
+		const newSharedState = {...this.sharedState, validationRules: newValidationRules }
 
+		return getBuilderInstance<ModelType, FieldType, DependentFieldType, DependsOnCalled, IsAsync, CurrentType>(newSharedState);
 	}
 }

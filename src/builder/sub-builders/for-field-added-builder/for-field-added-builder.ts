@@ -1,14 +1,11 @@
-import {
-	BuilderValidator, IsAsyncFunction,
+import type {
 	NestedPropGetter,
-	SharedBuilderState,
+	SharedStateFieldType,
 	ValidationRule,
-	Validator,
 } from "../../../types/validation.types";
-import { RuleAddedBuilder } from "../rule-added-builder/rule-added-builder";
 import { InitialBuilder } from "../initial-builder/initial-builder";
 import { CommonBuilder } from "../common-builder/common-builder";
-import {isAsyncFunction} from "../../utils/misc.util";
+import {GenericValidationBuilder} from "../type-validation/generic-validation-builder/generic-validation-builder";
 
 export class ForFieldAddedBuilder<
 	ModelType,
@@ -16,85 +13,8 @@ export class ForFieldAddedBuilder<
 	DependentFieldType,
 	DependsOnCalled extends boolean = false,
 	IsAsync extends boolean = false,
-> {
-	constructor(
-		private readonly sharedState: SharedBuilderState<
-			ModelType,
-			FieldType,
-			DependentFieldType,
-			DependsOnCalled,
-			IsAsync
-		>,
-	) {}
-
-	/**
-	 * Adds a validator function for the latest property rule
-	 * @param validator - The validator function
-	 * @param condition - An optional condition function to determine if the validator should run.
-	 * @returns ValidationBuilder A new ValidationBuilder instance with the added validator
-	 */
-	addRule<V extends Validator<ModelType, FieldType, DependentFieldType, DependsOnCalled>>(
-		validator: V,
-		condition?: (model: ModelType) => boolean,
-	): RuleAddedBuilder<
-		ModelType,
-		FieldType,
-		DependentFieldType,
-		DependsOnCalled,
-		IsAsyncFunction<V> extends true ? true : IsAsync
-	> {
-		if (this.sharedState.validationRules.length === 0)
-			throw new Error("Call 'forField' before using 'addRule'");
-
-		const isAsyncValidator = isAsyncFunction(validator);
-		const newValidator: BuilderValidator<
-			ModelType,
-			FieldType,
-			DependentFieldType,
-			DependsOnCalled
-		> = { validator, condition };
-
-		const currentRule = this.sharedState.validationRules[
-			this.sharedState.validationRules.length - 1
-		] as ValidationRule<
-			ModelType,
-			FieldType,
-			DependentFieldType,
-			DependsOnCalled
-		>;
-		const newValidators = [...currentRule.validators, newValidator];
-		const newRule = {
-			...currentRule,
-			validators: newValidators,
-			propertyName: this.sharedState.currentAlias || currentRule.propertyName,
-			isAsync: isAsyncValidator || currentRule.isAsync,
-		};
-
-		const newValidationRules: ValidationRule<
-			ModelType,
-			FieldType,
-			DependentFieldType,
-			DependsOnCalled,
-			IsAsyncFunction<V> extends true ? true : IsAsync
-		>[] = [
-			...this.sharedState.validationRules.slice(0, -1),
-			newRule,
-		] as unknown as ValidationRule<
-			ModelType,
-			FieldType,
-			DependentFieldType,
-			DependsOnCalled,
-			IsAsyncFunction<V> extends true ? true : IsAsync
-		>[];
-
-		return new RuleAddedBuilder<
-			ModelType,
-			FieldType,
-			DependentFieldType,
-			DependsOnCalled,
-			IsAsyncFunction<V> extends true ? true : IsAsync
-		>({ ...this.sharedState, validationRules: newValidationRules });
-	}
+	CurrentType extends SharedStateFieldType | null = null
+>  extends GenericValidationBuilder<ModelType, FieldType, DependentFieldType, DependsOnCalled, IsAsync, CurrentType>{
 
 	/**
 	 * Overrides the property name for the last added validation rule
@@ -107,7 +27,8 @@ export class ForFieldAddedBuilder<
 		FieldType,
 		DependentFieldType,
 		DependsOnCalled,
-		IsAsync
+		IsAsync,
+		CurrentType
 	> {
 		if (this.sharedState.validationRules.length === 0)
 			throw new Error("Call 'forField' before using 'aliasAs'");
@@ -144,7 +65,8 @@ export class ForFieldAddedBuilder<
 			FieldType,
 			DependentFieldType,
 			DependsOnCalled,
-			IsAsync
+			IsAsync,
+			CurrentType
 		>(newSharedState);
 	}
 
@@ -155,7 +77,7 @@ export class ForFieldAddedBuilder<
 	 */
 	dependsOn<NewDependentFieldType>(
 		dependentFieldGetter: NestedPropGetter<ModelType, NewDependentFieldType>,
-	): ForFieldAddedBuilder<ModelType, FieldType, NewDependentFieldType, true, IsAsync> {
+	): ForFieldAddedBuilder<ModelType, FieldType, NewDependentFieldType, true, IsAsync, CurrentType> {
 		if (this.sharedState.validationRules.length === 0)
 			throw new Error("Call 'forField' before using 'dependsOn'");
 
@@ -183,7 +105,8 @@ export class ForFieldAddedBuilder<
 			FieldType,
 			NewDependentFieldType,
 			true,
-			IsAsync
+			IsAsync,
+			CurrentType
 		>({ ...this.sharedState, validationRules: newValidationRules });
 	}
 
@@ -191,14 +114,15 @@ export class ForFieldAddedBuilder<
 		condition: (model: ModelType) => boolean,
 		builderCallback?: (
 			builder: InitialBuilder<ModelType>,
-		) => CommonBuilder<ModelType, Field, DependentField, DependsOnCalled, IsAsync>,
-	): CommonBuilder<ModelType, FieldType, DependentFieldType, DependsOnCalled, IsAsync> {
+		) => CommonBuilder<ModelType, Field, DependentField, DependsOnCalled, IsAsync, CurrentType>,
+	): CommonBuilder<ModelType, FieldType, DependentFieldType, DependsOnCalled, IsAsync, CurrentType> {
 		return new CommonBuilder<
 			ModelType,
 			FieldType,
 			DependentFieldType,
 			DependsOnCalled,
-			IsAsync
+			IsAsync,
+			CurrentType
 		>(this.sharedState).when(condition, builderCallback);
 	}
 }

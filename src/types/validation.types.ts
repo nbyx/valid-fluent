@@ -88,12 +88,16 @@ export type ValidationRule<
 	isAsync: IsAsync;
 };
 
+export type SharedStateFieldType = 'number' | 'string' | 'boolean' | 'Date';
+
+
 export interface SharedBuilderState<
 	ModelType,
 	FieldType,
 	DependentFieldType,
 	DependsOnCalled,
 	IsAsync extends boolean,
+	CurrentType extends SharedStateFieldType | null,
 > {
 	failFast: boolean;
 	validationRules: ReadonlyArray<
@@ -101,6 +105,7 @@ export interface SharedBuilderState<
 	>;
 	currentAlias: string | null;
 	currentFieldStartIndex: number;
+	currentType: CurrentType,
 }
 
 export type ValidationType<ModelType, IsAsync extends boolean> = IsAsync extends true
@@ -109,6 +114,5 @@ export type ValidationType<ModelType, IsAsync extends boolean> = IsAsync extends
 
 // rome-ignore lint: any needed for function typing
 export type IsAsyncFunction<T> = T extends (...args: any[]) => Promise<any> ? true : false;
-
 
 

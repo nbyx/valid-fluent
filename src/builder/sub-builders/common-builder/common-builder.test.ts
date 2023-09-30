@@ -19,6 +19,7 @@ const sharedState = {
 	currentFieldStartIndex: 0,
 	currentAlias: null,
 	failFast: true,
+	currentType: null,
 };
 
 describe("CommonBuilder", () => {
