@@ -9,7 +9,13 @@ interface TestModel {
 }
 
 describe("InitialBuilder", () => {
-	let sharedState: SharedBuilderState<TestModel, unknown, unknown, false, false>;
+	let sharedState: SharedBuilderState<
+		TestModel,
+		unknown,
+		unknown,
+		false,
+		false
+	>;
 
 	beforeEach(() => {
 		sharedState = {

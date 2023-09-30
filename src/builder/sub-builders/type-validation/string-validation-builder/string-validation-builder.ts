@@ -1,209 +1,401 @@
-import {RuleAddedBuilder} from "../../rule-added-builder/rule-added-builder";
-import {NestedPropGetter, SharedBuilderState, ValidationType, Validator} from "../../../../types/validation.types";
-import {CommonBuilder} from "../../common-builder/common-builder";
-import {ForFieldAddedBuilder} from "../../for-field-added-builder/for-field-added-builder";
-import {InitialBuilder} from "../../initial-builder/initial-builder";
+import { RuleAddedBuilder } from "../../rule-added-builder/rule-added-builder";
+import {
+	NestedPropGetter,
+	SharedBuilderState,
+	ValidationType,
+	Validator,
+} from "../../../../types/validation.types";
+import { CommonBuilder } from "../../common-builder/common-builder";
+import { ForFieldAddedBuilder } from "../../for-field-added-builder/for-field-added-builder";
+import { InitialBuilder } from "../../initial-builder/initial-builder";
 
-export class StringValidationBuilder<ModelType, DependentFieldType, DependsOnCalled extends boolean, IsAsync extends boolean> {
+export class StringValidationBuilder<
+	ModelType,
+	DependentFieldType,
+	DependsOnCalled extends boolean,
+	IsAsync extends boolean,
+> {
+	constructor(
+		private readonly sharedState: SharedBuilderState<
+			ModelType,
+			string,
+			DependentFieldType,
+			DependsOnCalled,
+			IsAsync,
+			"string"
+		>,
+	) {}
 
-    constructor(private readonly sharedState: SharedBuilderState<ModelType, string, DependentFieldType, DependsOnCalled, IsAsync, 'string'>) {
-    }
+	forField<NewFieldType>(
+		name: Extract<keyof ModelType, string>,
+		propGetter: NestedPropGetter<ModelType, NewFieldType>,
+	): ForFieldAddedBuilder<
+		ModelType,
+		NewFieldType,
+		DependentFieldType,
+		DependsOnCalled,
+		IsAsync
+	> {
+		return new CommonBuilder<
+			ModelType,
+			string,
+			DependentFieldType,
+			DependsOnCalled,
+			IsAsync
+		>({
+			...(this.sharedState as unknown as SharedBuilderState<
+				ModelType,
+				string,
+				DependentFieldType,
+				DependsOnCalled,
+				IsAsync,
+				null
+			>),
+		}).forField(name, propGetter);
+	}
 
-    forField<NewFieldType>(
-        name: Extract<keyof ModelType, string>,
-        propGetter: NestedPropGetter<ModelType, NewFieldType>,
-    ): ForFieldAddedBuilder<ModelType, NewFieldType, DependentFieldType, DependsOnCalled, IsAsync> {
-        return new CommonBuilder<ModelType, string, DependentFieldType, DependsOnCalled, IsAsync>({...this.sharedState as unknown as SharedBuilderState<ModelType, string, DependentFieldType, DependsOnCalled, IsAsync, null>}).forField(name, propGetter);
-    }
+	when<Field, DependentField>(
+		condition: (model: ModelType) => boolean,
+		builderCallback?: (
+			builder: InitialBuilder<ModelType>,
+		) => CommonBuilder<
+			ModelType,
+			Field,
+			DependentField,
+			DependsOnCalled,
+			IsAsync
+		>,
+	): CommonBuilder<
+		ModelType,
+		string,
+		DependentFieldType,
+		DependsOnCalled,
+		IsAsync
+	> {
+		return new CommonBuilder<
+			ModelType,
+			string,
+			DependentFieldType,
+			DependsOnCalled,
+			IsAsync
+		>({
+			...(this.sharedState as unknown as SharedBuilderState<
+				ModelType,
+				string,
+				DependentFieldType,
+				DependsOnCalled,
+				IsAsync,
+				null
+			>),
+		}).when(condition, builderCallback);
+	}
 
-    when<Field, DependentField>(
-        condition: (model: ModelType) => boolean,
-        builderCallback?: (
-            builder: InitialBuilder<ModelType>,
-        ) => CommonBuilder<ModelType, Field, DependentField, DependsOnCalled, IsAsync>,
-    ): CommonBuilder<ModelType, string, DependentFieldType, DependsOnCalled, IsAsync> {
-        return new CommonBuilder<ModelType, string, DependentFieldType, DependsOnCalled, IsAsync>({...this.sharedState as unknown as SharedBuilderState<ModelType, string, DependentFieldType, DependsOnCalled, IsAsync, null>}).when(condition, builderCallback);
-    }
+	addRule<
+		V extends Validator<ModelType, string, DependentFieldType, DependsOnCalled>,
+	>(validator: V, condition?: (model: ModelType) => boolean) {
+		return new CommonBuilder<
+			ModelType,
+			string,
+			DependentFieldType,
+			DependsOnCalled,
+			IsAsync
+		>({
+			...(this.sharedState as unknown as SharedBuilderState<
+				ModelType,
+				string,
+				DependentFieldType,
+				DependsOnCalled,
+				IsAsync,
+				null
+			>),
+		}).addRule(validator, condition);
+	}
 
-    addRule<V extends Validator<ModelType, string, DependentFieldType, DependsOnCalled>>(
-        validator: V,
-        condition?: (model: ModelType) => boolean,
-    ) {
-        return new CommonBuilder<ModelType, string, DependentFieldType, DependsOnCalled, IsAsync>({...this.sharedState as unknown as SharedBuilderState<ModelType, string, DependentFieldType, DependsOnCalled, IsAsync, null>}).addRule(validator, condition);
-    }
+	build(): ValidationType<ModelType, IsAsync> {
+		return new CommonBuilder<
+			ModelType,
+			string,
+			DependentFieldType,
+			DependsOnCalled,
+			IsAsync
+		>({
+			...(this.sharedState as unknown as SharedBuilderState<
+				ModelType,
+				string,
+				DependentFieldType,
+				DependsOnCalled,
+				IsAsync,
+				null
+			>),
+		}).build();
+	}
 
-    build(): ValidationType<ModelType, IsAsync> {
-        return new CommonBuilder<ModelType, string, DependentFieldType, DependsOnCalled, IsAsync>({...this.sharedState as unknown as SharedBuilderState<ModelType, string, DependentFieldType, DependsOnCalled, IsAsync, null>}).build();
-    }
+	maxLength(
+		len: number,
+	): RuleAddedBuilder<
+		ModelType,
+		string,
+		DependentFieldType,
+		DependsOnCalled,
+		IsAsync,
+		"string"
+	> {
+		const commonBuilder = new CommonBuilder<
+			ModelType,
+			string,
+			DependentFieldType,
+			DependsOnCalled,
+			IsAsync,
+			"string"
+		>(this.sharedState);
 
-    maxLength(len: number): RuleAddedBuilder<
-        ModelType,
-        string,
-        DependentFieldType,
-        DependsOnCalled,
-        IsAsync,
-        'string'
-    > {
-        const commonBuilder = new CommonBuilder<ModelType, string, DependentFieldType, DependsOnCalled, IsAsync, 'string'>(this.sharedState)
+		return commonBuilder.addRule(({ value }) => value.length <= len);
+	}
 
-        return commonBuilder.addRule(({ value }) => value.length <= len);
-    }
+	minLength(
+		len: number,
+	): RuleAddedBuilder<
+		ModelType,
+		string,
+		DependentFieldType,
+		DependsOnCalled,
+		IsAsync,
+		"string"
+	> {
+		const commonBuilder = new CommonBuilder<
+			ModelType,
+			string,
+			DependentFieldType,
+			DependsOnCalled,
+			IsAsync,
+			"string"
+		>(this.sharedState);
 
-    minLength(len: number): RuleAddedBuilder<
-        ModelType,
-        string,
-        DependentFieldType,
-        DependsOnCalled,
-        IsAsync,
-        'string'
-    >  {
-        const commonBuilder = new CommonBuilder<ModelType, string, DependentFieldType, DependsOnCalled, IsAsync, 'string'>(this.sharedState)
+		return commonBuilder.addRule(({ value }) => value.length >= len);
+	}
 
-        return commonBuilder.addRule(({ value }) => value.length >= len);
-    }
+	isEmail(): RuleAddedBuilder<
+		ModelType,
+		string,
+		DependentFieldType,
+		DependsOnCalled,
+		IsAsync,
+		"string"
+	> {
+		const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+		const commonBuilder = new CommonBuilder<
+			ModelType,
+			string,
+			DependentFieldType,
+			DependsOnCalled,
+			IsAsync,
+			"string"
+		>(this.sharedState);
 
-    isEmail(): RuleAddedBuilder<
-        ModelType,
-        string,
-        DependentFieldType,
-        DependsOnCalled,
-        IsAsync,
-        'string'
-    >   {
-        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        const commonBuilder = new CommonBuilder<ModelType, string, DependentFieldType, DependsOnCalled, IsAsync, 'string'>(this.sharedState)
+		return commonBuilder.addRule(({ value }) => emailPattern.test(value));
+	}
 
+	isNumeric(): RuleAddedBuilder<
+		ModelType,
+		string,
+		DependentFieldType,
+		DependsOnCalled,
+		IsAsync,
+		"string"
+	> {
+		const numericPattern = /^[0-9]+$/;
+		const commonBuilder = new CommonBuilder<
+			ModelType,
+			string,
+			DependentFieldType,
+			DependsOnCalled,
+			IsAsync,
+			"string"
+		>(this.sharedState);
 
-        return commonBuilder.addRule(({ value }) => emailPattern.test(value));
-    }
+		return commonBuilder.addRule(({ value }) => numericPattern.test(value));
+	}
 
-    isNumeric(): RuleAddedBuilder<
-        ModelType,
-        string,
-        DependentFieldType,
-        DependsOnCalled,
-        IsAsync,
-        'string'
-    >   {
-        const numericPattern = /^[0-9]+$/;
-        const commonBuilder = new CommonBuilder<ModelType, string, DependentFieldType, DependsOnCalled, IsAsync, 'string'>(this.sharedState)
+	matches(
+		pattern: RegExp,
+	): RuleAddedBuilder<
+		ModelType,
+		string,
+		DependentFieldType,
+		DependsOnCalled,
+		IsAsync,
+		"string"
+	> {
+		const commonBuilder = new CommonBuilder<
+			ModelType,
+			string,
+			DependentFieldType,
+			DependsOnCalled,
+			IsAsync,
+			"string"
+		>(this.sharedState);
 
-        return commonBuilder.addRule(({ value }) => numericPattern.test(value));
-    }
+		return commonBuilder.addRule(({ value }) => pattern.test(value));
+	}
 
-    matches(pattern: RegExp): RuleAddedBuilder<
-        ModelType,
-        string,
-        DependentFieldType,
-        DependsOnCalled,
-        IsAsync,
-        'string'
-    >   {
-        const commonBuilder = new CommonBuilder<ModelType, string, DependentFieldType, DependsOnCalled, IsAsync, 'string'>(this.sharedState)
+	hasCapitalLetter(): RuleAddedBuilder<
+		ModelType,
+		string,
+		DependentFieldType,
+		DependsOnCalled,
+		IsAsync,
+		"string"
+	> {
+		const capitalLetterPattern = /[A-Z]/;
+		const commonBuilder = new CommonBuilder<
+			ModelType,
+			string,
+			DependentFieldType,
+			DependsOnCalled,
+			IsAsync,
+			"string"
+		>(this.sharedState);
 
-        return commonBuilder.addRule(({ value }) => pattern.test(value));
-    }
+		return commonBuilder.addRule(({ value }) =>
+			capitalLetterPattern.test(value),
+		);
+	}
 
-    hasCapitalLetter(): RuleAddedBuilder<
-        ModelType,
-        string,
-        DependentFieldType,
-        DependsOnCalled,
-        IsAsync,
-        'string'
-    >   {
-        const capitalLetterPattern = /[A-Z]/;
-        const commonBuilder = new CommonBuilder<ModelType, string, DependentFieldType, DependsOnCalled, IsAsync, 'string'>(this.sharedState)
+	hasLowercaseLetter(): RuleAddedBuilder<
+		ModelType,
+		string,
+		DependentFieldType,
+		DependsOnCalled,
+		IsAsync,
+		"string"
+	> {
+		const lowercaseLetterPattern = /[a-z]/;
+		const commonBuilder = new CommonBuilder<
+			ModelType,
+			string,
+			DependentFieldType,
+			DependsOnCalled,
+			IsAsync,
+			"string"
+		>(this.sharedState);
 
-        return commonBuilder.addRule(({ value }) => capitalLetterPattern.test(value));
-    }
+		return commonBuilder.addRule(({ value }) =>
+			lowercaseLetterPattern.test(value),
+		);
+	}
 
-    hasLowercaseLetter(): RuleAddedBuilder<
-        ModelType,
-        string,
-        DependentFieldType,
-        DependsOnCalled,
-        IsAsync,
-        'string'
-    >   {
-        const lowercaseLetterPattern = /[a-z]/;
-        const commonBuilder = new CommonBuilder<ModelType, string, DependentFieldType, DependsOnCalled, IsAsync, 'string'>(this.sharedState)
+	hasNumber(): RuleAddedBuilder<
+		ModelType,
+		string,
+		DependentFieldType,
+		DependsOnCalled,
+		IsAsync,
+		"string"
+	> {
+		const numberPattern = /[0-9]/;
+		const commonBuilder = new CommonBuilder<
+			ModelType,
+			string,
+			DependentFieldType,
+			DependsOnCalled,
+			IsAsync,
+			"string"
+		>(this.sharedState);
 
-        return commonBuilder.addRule(({ value }) => lowercaseLetterPattern.test(value));
-    }
+		return commonBuilder.addRule(({ value }) => numberPattern.test(value));
+	}
 
-    hasNumber(): RuleAddedBuilder<
-        ModelType,
-        string,
-        DependentFieldType,
-        DependsOnCalled,
-        IsAsync,
-        'string'
-    >   {
-        const numberPattern = /[0-9]/;
-        const commonBuilder = new CommonBuilder<ModelType, string, DependentFieldType, DependsOnCalled, IsAsync, 'string'>(this.sharedState)
+	hasSpecialCharacter(): RuleAddedBuilder<
+		ModelType,
+		string,
+		DependentFieldType,
+		DependsOnCalled,
+		IsAsync,
+		"string"
+	> {
+		const specialCharacterPattern = /[\W_]/;
+		const commonBuilder = new CommonBuilder<
+			ModelType,
+			string,
+			DependentFieldType,
+			DependsOnCalled,
+			IsAsync,
+			"string"
+		>(this.sharedState);
 
-        return commonBuilder.addRule(({ value }) => numberPattern.test(value));
-    }
+		return commonBuilder.addRule(({ value }) =>
+			specialCharacterPattern.test(value),
+		);
+	}
 
-    hasSpecialCharacter(): RuleAddedBuilder<
-        ModelType,
-        string,
-        DependentFieldType,
-        DependsOnCalled,
-        IsAsync,
-        'string'
-    >   {
-        const specialCharacterPattern = /[\W_]/;
-        const commonBuilder = new CommonBuilder<ModelType, string, DependentFieldType, DependsOnCalled, IsAsync, 'string'>(this.sharedState)
+	isIn(
+		values: string[],
+	): RuleAddedBuilder<
+		ModelType,
+		string,
+		DependentFieldType,
+		DependsOnCalled,
+		IsAsync,
+		"string"
+	> {
+		const commonBuilder = new CommonBuilder<
+			ModelType,
+			string,
+			DependentFieldType,
+			DependsOnCalled,
+			IsAsync,
+			"string"
+		>(this.sharedState);
 
-        return commonBuilder.addRule(({ value }) => specialCharacterPattern.test(value));
-    }
+		return commonBuilder.addRule(({ value }) => values.includes(value));
+	}
 
-    isIn(values: string[]): RuleAddedBuilder<
-        ModelType,
-        string,
-        DependentFieldType,
-        DependsOnCalled,
-        IsAsync,
-        'string'
-    >   {
-        const commonBuilder = new CommonBuilder<ModelType, string, DependentFieldType, DependsOnCalled, IsAsync, 'string'>(this.sharedState)
+	isURL(): RuleAddedBuilder<
+		ModelType,
+		string,
+		DependentFieldType,
+		DependsOnCalled,
+		IsAsync,
+		"string"
+	> {
+		const commonBuilder = new CommonBuilder<
+			ModelType,
+			string,
+			DependentFieldType,
+			DependsOnCalled,
+			IsAsync,
+			"string"
+		>(this.sharedState);
 
-        return commonBuilder.addRule(({ value }) => values.includes(value));
-    }
+		return commonBuilder.addRule(({ value }) => {
+			try {
+				new URL(value);
+				return true;
+			} catch {
+				return false;
+			}
+		});
+	}
 
-    isURL(): RuleAddedBuilder<
-        ModelType,
-        string,
-        DependentFieldType,
-        DependsOnCalled,
-        IsAsync,
-        'string'
-    > {
-        const commonBuilder = new CommonBuilder<ModelType, string, DependentFieldType, DependsOnCalled, IsAsync, 'string'>(this.sharedState)
+	isUUID(): RuleAddedBuilder<
+		ModelType,
+		string,
+		DependentFieldType,
+		DependsOnCalled,
+		IsAsync,
+		"string"
+	> {
+		const uuidPattern =
+			/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/;
+		const commonBuilder = new CommonBuilder<
+			ModelType,
+			string,
+			DependentFieldType,
+			DependsOnCalled,
+			IsAsync,
+			"string"
+		>(this.sharedState);
 
-        return commonBuilder.addRule(({ value }) => {
-            try {
-                new URL(value);
-                return true;
-            } catch {
-                return false;
-            }
-        });
-    }
-
-    isUUID(): RuleAddedBuilder<
-        ModelType,
-        string,
-        DependentFieldType,
-        DependsOnCalled,
-        IsAsync,
-        'string'
-    >   {
-        const uuidPattern = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/;
-        const commonBuilder = new CommonBuilder<ModelType, string, DependentFieldType, DependsOnCalled, IsAsync, 'string'>(this.sharedState)
-
-        return commonBuilder.addRule(({ value }) => uuidPattern.test(value));
-    }
+		return commonBuilder.addRule(({ value }) => uuidPattern.test(value));
+	}
 }

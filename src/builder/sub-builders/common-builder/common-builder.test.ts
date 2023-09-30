@@ -78,7 +78,6 @@ describe("CommonBuilder", () => {
 		if (!result.isValid) {
 			expect(result.result.username.message).toBe("Your error message here");
 		}
-
 	});
 
 	test("No forField before when", () => {

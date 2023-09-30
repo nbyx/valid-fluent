@@ -3,5 +3,5 @@ export function isNonEmptyObject<T extends object>(obj: T | {}): obj is T {
 }
 
 export const isAsyncFunction = (fn: Function): boolean => {
-	return fn.constructor.name === 'AsyncFunction';
-}
+	return fn.constructor.name === "AsyncFunction";
+};

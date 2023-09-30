@@ -10,7 +10,14 @@ interface TestModel {
 }
 
 describe("ForFieldAddedBuilder class", () => {
-	let sharedState: SharedBuilderState<TestModel, unknown, unknown, false, false, null>;
+	let sharedState: SharedBuilderState<
+		TestModel,
+		unknown,
+		unknown,
+		false,
+		false,
+		null
+	>;
 
 	beforeEach(() => {
 		sharedState = {
@@ -49,8 +56,6 @@ describe("ForFieldAddedBuilder class", () => {
 
 		expect(result.isValid).toBe(true);
 	});
-
-
 
 	test("aliasAs without prior forField call", () => {
 		expect(() => {

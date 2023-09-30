@@ -1,7 +1,9 @@
 import {
 	ValidationError,
 	ValidationOutcome,
-	ValidationResult, ValidationRule, ValidationSuccess
+	ValidationResult,
+	ValidationRule,
+	ValidationSuccess,
 } from "../../types/validation.types";
 
 type ValidationOutcomeArgs<ModelType> =
@@ -19,16 +21,28 @@ export function createValidationOutcome<ModelType>(
 	} as ValidationError<ModelType>;
 }
 
-
-export function createSyncRule<ModelType, FieldValue = unknown, DependentValueType = unknown>(
-	rule: Omit<ValidationRule<ModelType, FieldValue, DependentValueType, false, false>, 'isAsync'>
+export function createSyncRule<
+	ModelType,
+	FieldValue = unknown,
+	DependentValueType = unknown,
+>(
+	rule: Omit<
+		ValidationRule<ModelType, FieldValue, DependentValueType, false, false>,
+		"isAsync"
+	>,
 ): ValidationRule<ModelType, FieldValue, DependentValueType, false, false> {
 	return { ...rule, isAsync: false };
 }
 
-export function createAsyncRule<ModelType, FieldValue = unknown, DependentValueType = unknown>(
-	rule: Omit<ValidationRule<ModelType, FieldValue, DependentValueType, false, true>, 'isAsync'>
+export function createAsyncRule<
+	ModelType,
+	FieldValue = unknown,
+	DependentValueType = unknown,
+>(
+	rule: Omit<
+		ValidationRule<ModelType, FieldValue, DependentValueType, false, true>,
+		"isAsync"
+	>,
 ): ValidationRule<ModelType, FieldValue, DependentValueType, false, true> {
 	return { ...rule, isAsync: true };
 }
-

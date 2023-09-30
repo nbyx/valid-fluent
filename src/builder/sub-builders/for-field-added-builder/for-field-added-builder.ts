@@ -5,7 +5,7 @@ import type {
 } from "../../../types/validation.types";
 import { InitialBuilder } from "../initial-builder/initial-builder";
 import { CommonBuilder } from "../common-builder/common-builder";
-import {GenericValidationBuilder} from "../type-validation/generic-validation-builder/generic-validation-builder";
+import { GenericValidationBuilder } from "../type-validation/generic-validation-builder/generic-validation-builder";
 
 export class ForFieldAddedBuilder<
 	ModelType,
@@ -13,9 +13,15 @@ export class ForFieldAddedBuilder<
 	DependentFieldType,
 	DependsOnCalled extends boolean = false,
 	IsAsync extends boolean = false,
-	CurrentType extends SharedStateFieldType | null = null
->  extends GenericValidationBuilder<ModelType, FieldType, DependentFieldType, DependsOnCalled, IsAsync, CurrentType>{
-
+	CurrentType extends SharedStateFieldType | null = null,
+> extends GenericValidationBuilder<
+	ModelType,
+	FieldType,
+	DependentFieldType,
+	DependsOnCalled,
+	IsAsync,
+	CurrentType
+> {
 	/**
 	 * Overrides the property name for the last added validation rule
 	 * @param name - The name that should be in the validation result as propertyName
@@ -77,7 +83,14 @@ export class ForFieldAddedBuilder<
 	 */
 	dependsOn<NewDependentFieldType>(
 		dependentFieldGetter: NestedPropGetter<ModelType, NewDependentFieldType>,
-	): ForFieldAddedBuilder<ModelType, FieldType, NewDependentFieldType, true, IsAsync, CurrentType> {
+	): ForFieldAddedBuilder<
+		ModelType,
+		FieldType,
+		NewDependentFieldType,
+		true,
+		IsAsync,
+		CurrentType
+	> {
 		if (this.sharedState.validationRules.length === 0)
 			throw new Error("Call 'forField' before using 'dependsOn'");
 
@@ -114,8 +127,22 @@ export class ForFieldAddedBuilder<
 		condition: (model: ModelType) => boolean,
 		builderCallback?: (
 			builder: InitialBuilder<ModelType>,
-		) => CommonBuilder<ModelType, Field, DependentField, DependsOnCalled, IsAsync, CurrentType>,
-	): CommonBuilder<ModelType, FieldType, DependentFieldType, DependsOnCalled, IsAsync, CurrentType> {
+		) => CommonBuilder<
+			ModelType,
+			Field,
+			DependentField,
+			DependsOnCalled,
+			IsAsync,
+			CurrentType
+		>,
+	): CommonBuilder<
+		ModelType,
+		FieldType,
+		DependentFieldType,
+		DependsOnCalled,
+		IsAsync,
+		CurrentType
+	> {
 		return new CommonBuilder<
 			ModelType,
 			FieldType,

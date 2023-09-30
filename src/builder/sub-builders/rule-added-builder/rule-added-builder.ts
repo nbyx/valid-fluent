@@ -1,9 +1,10 @@
 import {
-	SharedBuilderState, SharedStateFieldType,
+	SharedBuilderState,
+	SharedStateFieldType,
 	ValidationRule,
 } from "../../../types/validation.types";
 import { getBuilderInstance } from "../../utils/builder-instance.util";
-import type {BuilderType} from "../../../types/builder.type";
+import type { BuilderType } from "../../../types/builder.type";
 
 export class RuleAddedBuilder<
 	ModelType,
@@ -11,7 +12,7 @@ export class RuleAddedBuilder<
 	DependentFieldType,
 	DependsOnCalled extends boolean = false,
 	IsAsync extends boolean = false,
-	CurrentType extends SharedStateFieldType | null = null
+	CurrentType extends SharedStateFieldType | null = null,
 > {
 	constructor(
 		private readonly sharedState: SharedBuilderState<
@@ -30,9 +31,17 @@ export class RuleAddedBuilder<
 	 */
 	withMessage(
 		errorMessage: string | ((model: ModelType) => string),
-	): BuilderType<CurrentType, ModelType, FieldType, DependentFieldType, DependsOnCalled, IsAsync> {
+	): BuilderType<
+		CurrentType,
+		ModelType,
+		FieldType,
+		DependentFieldType,
+		DependsOnCalled,
+		IsAsync
+	> {
 		const lastRuleIndex = this.sharedState.validationRules.length - 1;
-		if (lastRuleIndex === -1) throw new Error('no rule was provided before calling withMessage');
+		if (lastRuleIndex === -1)
+			throw new Error("no rule was provided before calling withMessage");
 
 		const lastRule = {
 			...this.sharedState.validationRules[lastRuleIndex],
@@ -47,14 +56,26 @@ export class RuleAddedBuilder<
 		const newValidationRules = [
 			...this.sharedState.validationRules.slice(0, lastRuleIndex),
 			lastRule,
-		] as ValidationRule<ModelType,
+		] as ValidationRule<
+			ModelType,
 			FieldType,
 			DependentFieldType,
 			DependsOnCalled,
-			IsAsync>[];
+			IsAsync
+		>[];
 
-		const newSharedState = {...this.sharedState, validationRules: newValidationRules }
+		const newSharedState = {
+			...this.sharedState,
+			validationRules: newValidationRules,
+		};
 
-		return getBuilderInstance<ModelType, FieldType, DependentFieldType, DependsOnCalled, IsAsync, CurrentType>(newSharedState);
+		return getBuilderInstance<
+			ModelType,
+			FieldType,
+			DependentFieldType,
+			DependsOnCalled,
+			IsAsync,
+			CurrentType
+		>(newSharedState);
 	}
 }
